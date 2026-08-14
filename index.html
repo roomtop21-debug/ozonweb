@@ -10,789 +10,261 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0edf5;
-            overflow: hidden;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0edf5; overflow: hidden; }
 
         /* ===== ЭКРАН ЗАГРУЗКИ ===== */
         .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0f3460 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            transition: opacity 0.8s ease;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10000; transition: opacity 0.8s ease;
         }
-
-        .loading-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .loading-logo {
-            font-size: 52px;
-            font-weight: 800;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, #005bff, #7f3bff, #ff2d6b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .progress-container {
-            width: 320px;
-            max-width: 80%;
-            height: 4px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #005bff, #7f3bff, #ff2d6b);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        .progress-text {
-            color: rgba(255,255,255,0.5);
-            font-size: 13px;
-            margin-bottom: 20px;
-            font-weight: 300;
-            letter-spacing: 1px;
-        }
-
-        .status-phrase {
-            color: rgba(255,255,255,0.8);
-            font-size: 18px;
-            font-weight: 300;
-            min-height: 30px;
-            text-align: center;
-        }
-
-        .status-phrase .emoji {
-            margin-right: 8px;
-        }
+        .loading-screen.hidden { opacity: 0; pointer-events: none; }
+        .loading-logo { font-size: 52px; font-weight: 800; margin-bottom: 30px; background: linear-gradient(135deg, #005bff, #7f3bff, #ff2d6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .progress-container { width: 320px; max-width: 80%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
+        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #005bff, #7f3bff, #ff2d6b); border-radius: 4px; transition: width 0.3s ease; }
+        .progress-text { color: rgba(255,255,255,0.5); font-size: 13px; margin-bottom: 20px; font-weight: 300; letter-spacing: 1px; }
+        .status-phrase { color: rgba(255,255,255,0.8); font-size: 18px; font-weight: 300; min-height: 30px; text-align: center; }
+        .status-phrase .emoji { margin-right: 8px; }
 
         /* ===== ЭКРАН ВХОДА ===== */
         .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0f3460 100%);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
+            display: none; justify-content: center; align-items: center; z-index: 9999;
         }
-
-        .login-overlay.active {
-            display: flex;
-        }
-
+        .login-overlay.active { display: flex; }
         .login-card {
-            background: rgba(255,255,255,0.95);
-            padding: 45px 40px;
-            border-radius: 30px;
-            max-width: 420px;
-            width: 90%;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+            background: rgba(255,255,255,0.95); padding: 45px 40px; border-radius: 30px;
+            max-width: 420px; width: 90%; box-shadow: 0 40px 80px rgba(0,0,0,0.5);
             animation: slideUp 0.5s ease;
         }
-
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .login-card h1 {
-            font-size: 32px;
-            font-weight: 800;
-            color: #1a1a2e;
-            margin-bottom: 4px;
-        }
-
-        .login-card .sub {
-            color: #888;
-            font-size: 15px;
-            margin-bottom: 28px;
-        }
-
-        .login-card label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
-
-        .login-card input {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #e0dce8;
-            border-radius: 14px;
-            font-size: 16px;
-            background: #f8f6fc;
-            margin-bottom: 16px;
-            transition: 0.3s;
-        }
-
-        .login-card input:focus {
-            border-color: #005bff;
-            outline: none;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(0,91,255,0.1);
-        }
-
-        .login-card .login-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #005bff, #7f3bff);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 8px;
-        }
-
-        .login-card .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,91,255,0.35);
-        }
-
-        .login-error {
-            color: #ff2d6b;
-            text-align: center;
-            margin-top: 12px;
-            font-weight: 500;
-            font-size: 14px;
-            min-height: 22px;
-        }
-
-        .login-users {
-            margin-top: 20px;
-            padding: 16px;
-            background: #f5f3ff;
-            border-radius: 14px;
-            font-size: 13px;
-            color: #555;
-        }
-
-        .login-users p {
-            margin: 3px 0;
-        }
-
-        .login-users strong {
-            color: #1a1a2e;
-        }
-
-        .login-users .hint {
-            font-size: 12px;
-            color: #999;
-            margin-top: 8px;
-            text-align: center;
-        }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .login-card h1 { font-size: 32px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
+        .login-card .sub { color: #888; font-size: 15px; margin-bottom: 28px; }
+        .login-card label { display: block; font-weight: 600; color: #333; font-size: 14px; margin-bottom: 6px; }
+        .login-card input { width: 100%; padding: 14px 18px; border: 2px solid #e0dce8; border-radius: 14px; font-size: 16px; background: #f8f6fc; margin-bottom: 16px; transition: 0.3s; }
+        .login-card input:focus { border-color: #005bff; outline: none; background: white; box-shadow: 0 0 0 4px rgba(0,91,255,0.1); }
+        .login-card .login-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #005bff, #7f3bff); color: white; border: none; border-radius: 14px; font-size: 18px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 8px; }
+        .login-card .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,91,255,0.35); }
+        .login-error { color: #ff2d6b; text-align: center; margin-top: 12px; font-weight: 500; font-size: 14px; min-height: 22px; }
+        .login-users { margin-top: 20px; padding: 16px; background: #f5f3ff; border-radius: 14px; font-size: 13px; color: #555; }
+        .login-users p { margin: 3px 0; }
+        .login-users strong { color: #1a1a2e; }
+        .login-users .hint { font-size: 12px; color: #999; margin-top: 8px; text-align: center; }
 
         /* ===== ОСНОВНОЙ ИНТЕРФЕЙС ===== */
-        .app-wrapper {
-            display: none;
-            width: 100vw;
-            height: 100vh;
-            background: #f0edf5;
-            flex-direction: column;
-        }
+        .app-wrapper { display: none; width: 100vw; height: 100vh; background: #f0edf5; flex-direction: column; }
+        .app-wrapper.active { display: flex; }
 
-        .app-wrapper.active {
-            display: flex;
-        }
-
-        /* ===== ШАПКА ===== */
         .header {
             background: linear-gradient(135deg, #005bff 0%, #7f3bff 50%, #ff2d6b 100%);
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-            flex-wrap: wrap;
-            gap: 12px;
-            min-height: 72px;
+            padding: 16px 32px; display: flex; justify-content: space-between; align-items: center;
+            flex-shrink: 0; flex-wrap: wrap; gap: 12px; min-height: 72px;
         }
+        .logo-area { display: flex; align-items: center; gap: 14px; }
+        .logo-icon { background: white; width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #005bff; }
+        .logo-area h1 { color: white; font-size: 24px; font-weight: 700; }
+        .user-panel { display: flex; align-items: center; gap: 16px; }
+        .user-badge { background: rgba(255,255,255,0.15); padding: 8px 22px; border-radius: 50px; color: white; font-weight: 500; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 10px; font-size: 15px; }
+        .logout-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 22px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: 0.3s; font-size: 14px; }
+        .logout-btn:hover { background: rgba(255,255,255,0.25); }
 
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .logo-icon {
-            background: white;
-            width: 46px;
-            height: 46px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 800;
-            color: #005bff;
-        }
-
-        .logo-area h1 {
-            color: white;
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .user-panel {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .user-badge {
-            background: rgba(255,255,255,0.15);
-            padding: 8px 22px;
-            border-radius: 50px;
-            color: white;
-            font-weight: 500;
-            border: 1px solid rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 15px;
-        }
-
-        .logout-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            padding: 8px 22px;
-            border-radius: 50px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 14px;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255,255,255,0.25);
-        }
-
-        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
-        .main-content {
-            flex: 1;
-            padding: 24px 32px 32px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+        .main-content { flex: 1; padding: 24px 32px 32px; overflow: hidden; display: flex; flex-direction: column; }
 
         /* ===== ВКЛАДКИ ===== */
         .tabs {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e0dce8;
-            padding-bottom: 4px;
-            flex-shrink: 0;
+            display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 2px solid #e0dce8;
+            padding-bottom: 4px; flex-shrink: 0; flex-wrap: wrap;
         }
-
         .tab-btn {
-            padding: 12px 32px;
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            font-weight: 600;
-            color: #777;
-            cursor: pointer;
-            border-radius: 12px 12px 0 0;
+            padding: 12px 32px; border: none; background: transparent; font-size: 16px;
+            font-weight: 600; color: #777; cursor: pointer; border-radius: 12px 12px 0 0;
             transition: 0.3s;
         }
+        .tab-btn:hover { background: #e8e4f0; color: #333; }
+        .tab-btn.active { background: linear-gradient(135deg, #005bff, #7f3bff); color: white; box-shadow: 0 4px 15px rgba(0,91,255,0.25); }
 
-        .tab-btn:hover {
-            background: #e8e4f0;
-            color: #333;
-        }
+        .tab-content { display: none; flex: 1; animation: fadeIn 0.3s ease; overflow: hidden; }
+        .tab-content.active { display: flex; gap: 24px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        .tab-btn.active {
-            background: linear-gradient(135deg, #005bff, #7f3bff);
-            color: white;
-            box-shadow: 0 4px 15px rgba(0,91,255,0.25);
-        }
-
-        /* ===== КОНТЕНТ ВКЛАДОК ===== */
-        .tab-content {
-            display: none;
-            flex: 1;
-            animation: fadeIn 0.3s ease;
-            overflow: hidden;
-        }
-
-        .tab-content.active {
-            display: flex;
-            gap: 24px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ===== КАРТОЧКИ ===== */
-        .card {
-            flex: 1;
-            background: white;
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-            border: 1px solid #edeaf5;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-
-        .card-title {
-            font-size: 19px;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .card-title small {
-            font-size: 13px;
-            font-weight: 400;
-            color: #999;
-            margin-left: auto;
-        }
-
-        .card-title .count {
-            background: #f0edf5;
-            padding: 2px 12px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #555;
-        }
+        .card { flex: 1; background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid #edeaf5; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+        .card-title { font-size: 19px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .card-title small { font-size: 13px; font-weight: 400; color: #999; margin-left: auto; }
+        .card-title .count { background: #f0edf5; padding: 2px 12px; border-radius: 50px; font-size: 13px; font-weight: 600; color: #555; }
 
         /* ===== ЧАТ ===== */
-        .chat-messages {
-            flex: 1;
-            background: #f8f6fc;
-            border-radius: 16px;
-            padding: 16px;
-            overflow-y: auto;
-            margin-bottom: 14px;
-            min-height: 200px;
-            max-height: calc(100vh - 380px);
-        }
-
-        .msg {
-            background: white;
-            padding: 10px 16px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            border-left: 4px solid #005bff;
-        }
-
-        .msg strong {
-            color: #005bff;
-            display: block;
-            font-size: 13px;
-            margin-bottom: 3px;
-        }
-
-        .msg .time {
-            font-size: 11px;
-            color: #aaa;
-            margin-top: 4px;
-        }
-
-        .msg-input-row {
-            display: flex;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .msg-input-row input {
-            flex: 1;
-            padding: 12px 18px;
-            border: 2px solid #e0dce8;
-            border-radius: 14px;
-            font-size: 15px;
-            background: #f8f6fc;
-            min-width: 0;
-        }
-
-        .msg-input-row input:focus {
-            border-color: #005bff;
-            outline: none;
-            background: white;
-        }
-
-        .msg-input-row button {
-            padding: 12px 28px;
-            background: linear-gradient(135deg, #005bff, #7f3bff);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: 0.3s;
-            white-space: nowrap;
-        }
-
-        .msg-input-row button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(0,91,255,0.3);
-        }
+        .chat-messages { flex: 1; background: #f8f6fc; border-radius: 16px; padding: 16px; overflow-y: auto; margin-bottom: 14px; min-height: 200px; max-height: calc(100vh - 380px); }
+        .msg { background: white; padding: 10px 16px; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid #005bff; }
+        .msg strong { color: #005bff; display: block; font-size: 13px; margin-bottom: 3px; }
+        .msg .time { font-size: 11px; color: #aaa; margin-top: 4px; }
+        .msg-input-row { display: flex; gap: 10px; flex-shrink: 0; }
+        .msg-input-row input { flex: 1; padding: 12px 18px; border: 2px solid #e0dce8; border-radius: 14px; font-size: 15px; background: #f8f6fc; min-width: 0; }
+        .msg-input-row input:focus { border-color: #005bff; outline: none; background: white; }
+        .msg-input-row button { padding: 12px 28px; background: linear-gradient(135deg, #005bff, #7f3bff); color: white; border: none; border-radius: 14px; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.3s; white-space: nowrap; }
+        .msg-input-row button:hover { transform: scale(1.02); box-shadow: 0 4px 15px rgba(0,91,255,0.3); }
 
         /* ===== ЗАДАЧИ ===== */
-        .task-list {
+        .task-list { flex: 1; overflow-y: auto; margin-bottom: 14px; min-height: 150px; max-height: calc(100vh - 380px); }
+        .task-item { background: #f8f6fc; padding: 12px 16px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ff2d6b; gap: 10px; flex-wrap: wrap; }
+        .task-item .task-text { font-weight: 500; color: #1a1a2e; word-break: break-word; }
+        .task-item .task-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .task-item .task-actions select { padding: 5px 10px; border: 2px solid #e0dce8; border-radius: 8px; font-size: 13px; background: white; cursor: pointer; }
+        .task-item .task-actions select:disabled { opacity: 0.5; cursor: not-allowed; }
+        .task-item .task-actions .delete-btn { background: #ff2d6b; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .task-item .task-actions .delete-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .task-item .task-actions .delete-btn:hover:not(:disabled) { background: #cc0044; transform: scale(1.05); }
+        .task-item .task-author { font-size: 11px; color: #999; margin-left: 10px; }
+        .add-task-row { display: flex; gap: 10px; flex-shrink: 0; }
+        .add-task-row input { flex: 2; padding: 12px 18px; border: 2px solid #e0dce8; border-radius: 14px; font-size: 15px; background: #f8f6fc; min-width: 0; }
+        .add-task-row input:focus { border-color: #005bff; outline: none; background: white; }
+        .add-task-row select { padding: 12px 16px; border: 2px solid #e0dce8; border-radius: 14px; font-size: 14px; background: white; flex: 1; min-width: 80px; }
+        .add-task-row button { padding: 12px 24px; background: linear-gradient(135deg, #ff2d6b, #b82c8c); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 20px; cursor: pointer; transition: 0.3s; white-space: nowrap; }
+        .add-task-row button:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(255,45,107,0.3); }
+
+        /* ===== ПОТЕРЯННЫЕ ТОВАРЫ ===== */
+        .lost-items-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
             flex: 1;
             overflow-y: auto;
             margin-bottom: 14px;
             min-height: 150px;
             max-height: calc(100vh - 380px);
         }
-
-        .task-item {
+        .lost-item-card {
             background: #f8f6fc;
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 8px;
+            border-radius: 16px;
+            padding: 16px;
+            border-left: 4px solid #ff9800;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .lost-item-card .item-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 4px solid #ff2d6b;
-            gap: 10px;
-            flex-wrap: wrap;
         }
-
-        .task-item .task-text {
-            font-weight: 500;
+        .lost-item-card .item-header .sku {
+            font-weight: 700;
             color: #1a1a2e;
-            word-break: break-word;
+            font-size: 14px;
         }
-
-        .task-item .task-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
+        .lost-item-card .item-header .status {
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
         }
+        .status-search { background: #fff3cd; color: #856404; }
+        .status-lost { background: #f8d7da; color: #721c24; }
+        .status-found { background: #d4edda; color: #155724; }
+        .lost-item-card .item-description { font-size: 14px; color: #555; word-break: break-word; }
+        .lost-item-card .item-meta { font-size: 12px; color: #999; display: flex; justify-content: space-between; }
+        .lost-item-card .item-actions { display: flex; gap: 8px; margin-top: 4px; }
+        .lost-item-card .item-actions select { padding: 4px 8px; border: 2px solid #e0dce8; border-radius: 8px; font-size: 12px; background: white; cursor: pointer; flex: 1; }
+        .lost-item-card .item-actions .delete-lost-btn { background: #ff2d6b; color: white; border: none; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .lost-item-card .item-actions .delete-lost-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .lost-item-card .item-actions .delete-lost-btn:hover:not(:disabled) { background: #cc0044; }
 
-        .task-item .task-actions select {
-            padding: 5px 10px;
-            border: 2px solid #e0dce8;
-            border-radius: 8px;
-            font-size: 13px;
-            background: white;
-        }
-
-        .task-item .task-actions .delete-btn {
-            background: #ff2d6b;
-            color: white;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        .task-item .task-actions .delete-btn:hover {
-            background: #cc0044;
-            transform: scale(1.05);
-        }
-
-        .add-task-row {
-            display: flex;
+        .add-lost-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             flex-shrink: 0;
         }
-
-        .add-task-row input {
-            flex: 2;
-            padding: 12px 18px;
-            border: 2px solid #e0dce8;
-            border-radius: 14px;
-            font-size: 15px;
-            background: #f8f6fc;
-            min-width: 0;
-        }
-
-        .add-task-row input:focus {
-            border-color: #005bff;
-            outline: none;
-            background: white;
-        }
-
-        .add-task-row select {
+        .add-lost-row input, .add-lost-row textarea {
             padding: 12px 16px;
             border: 2px solid #e0dce8;
             border-radius: 14px;
             font-size: 14px;
-            background: white;
-            flex: 1;
-            min-width: 80px;
+            background: #f8f6fc;
+            transition: 0.3s;
         }
-
-        .add-task-row button {
+        .add-lost-row input:focus, .add-lost-row textarea:focus {
+            border-color: #005bff;
+            outline: none;
+            background: white;
+        }
+        .add-lost-row textarea { resize: vertical; min-height: 60px; grid-column: 1 / -1; }
+        .add-lost-row .lost-btn {
             padding: 12px 24px;
-            background: linear-gradient(135deg, #ff2d6b, #b82c8c);
+            background: linear-gradient(135deg, #ff9800, #f57c00);
             color: white;
             border: none;
             border-radius: 14px;
             font-weight: 700;
-            font-size: 20px;
+            font-size: 16px;
             cursor: pointer;
             transition: 0.3s;
-            white-space: nowrap;
+            grid-column: 1 / -1;
         }
+        .add-lost-row .lost-btn:hover { transform: scale(1.02); box-shadow: 0 4px 15px rgba(255,152,0,0.3); }
 
-        .add-task-row button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(255,45,107,0.3);
-        }
-
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            min-height: 150px;
-            color: #bbb;
-        }
-
-        .empty-state .icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        .empty-state p {
-            font-size: 15px;
-        }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 150px; color: #bbb; }
+        .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
+        .empty-state p { font-size: 15px; }
 
         /* ===== ДОСТАВКА ===== */
-        .delivery-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .delivery-banner {
-            background: linear-gradient(135deg, #f8f6fc, #edeaf5);
-            border-radius: 30px;
-            padding: 60px 80px;
-            text-align: center;
-            border: 2px dashed #d5cce8;
-            max-width: 600px;
-            width: 100%;
-        }
-
-        .delivery-banner .icon {
-            font-size: 72px;
-            margin-bottom: 16px;
-        }
-
-        .delivery-banner h2 {
-            font-size: 30px;
-            color: #1a1a2e;
-            margin-bottom: 8px;
-        }
-
-        .delivery-banner p {
-            color: #888;
-            font-size: 17px;
-        }
-
-        .delivery-banner .badge {
-            display: inline-block;
-            background: white;
-            padding: 8px 28px;
-            border-radius: 50px;
-            margin-top: 16px;
-            font-weight: 600;
-            color: #005bff;
-        }
+        .delivery-content { flex: 1; display: flex; align-items: center; justify-content: center; }
+        .delivery-banner { background: linear-gradient(135deg, #f8f6fc, #edeaf5); border-radius: 30px; padding: 60px 80px; text-align: center; border: 2px dashed #d5cce8; max-width: 600px; width: 100%; }
+        .delivery-banner .icon { font-size: 72px; margin-bottom: 16px; }
+        .delivery-banner h2 { font-size: 30px; color: #1a1a2e; margin-bottom: 8px; }
+        .delivery-banner p { color: #888; font-size: 17px; }
+        .delivery-banner .badge { display: inline-block; background: white; padding: 8px 28px; border-radius: 50px; margin-top: 16px; font-weight: 600; color: #005bff; }
 
         /* ===== ФИОЛЕТОВЫЙ СТИЛЬ ДЛЯ WB ===== */
-        .tab-content#tabWb .card {
-            border-color: #d5b8ff;
-            background: #faf5ff;
-        }
+        .tab-content#tabWb .card { border-color: #d5b8ff; background: #faf5ff; }
+        .tab-content#tabWb .card-title { color: #6b2fa0; }
+        .tab-content#tabWb .card-title .count { background: #e8d5ff; color: #6b2fa0; }
+        .tab-content#tabWb .chat-messages { background: #f3ecff; }
+        .tab-content#tabWb .msg { border-left-color: #9b4dff; }
+        .tab-content#tabWb .msg strong { color: #7b2fbe; }
+        .tab-content#tabWb .msg-input-row button { background: linear-gradient(135deg, #9b4dff, #6b2fa0); }
+        .tab-content#tabWb .msg-input-row button:hover { box-shadow: 0 4px 15px rgba(155,77,255,0.4); }
+        .tab-content#tabWb .task-item { background: #f3ecff; border-left-color: #9b4dff; }
+        .tab-content#tabWb .task-item .task-text { color: #4a1a6b; }
+        .tab-content#tabWb .task-item .task-actions select { border-color: #d5b8ff; background: white; }
+        .tab-content#tabWb .task-item .task-actions .delete-btn { background: #9b4dff; }
+        .tab-content#tabWb .task-item .task-actions .delete-btn:hover:not(:disabled) { background: #6b2fa0; }
+        .tab-content#tabWb .add-task-row input { border-color: #d5b8ff; background: #faf5ff; }
+        .tab-content#tabWb .add-task-row input:focus { border-color: #9b4dff; box-shadow: 0 0 0 4px rgba(155,77,255,0.1); }
+        .tab-content#tabWb .add-task-row select { border-color: #d5b8ff; background: white; }
+        .tab-content#tabWb .add-task-row button { background: linear-gradient(135deg, #9b4dff, #6b2fa0); }
+        .tab-content#tabWb .add-task-row button:hover { box-shadow: 0 4px 15px rgba(155,77,255,0.3); }
+        .tab-content#tabWb .lost-item-card { background: #f3ecff; border-left-color: #9b4dff; }
+        .tab-content#tabWb .lost-item-card .item-header .sku { color: #4a1a6b; }
+        .tab-content#tabWb .add-lost-row input, .tab-content#tabWb .add-lost-row textarea { border-color: #d5b8ff; background: #faf5ff; }
+        .tab-content#tabWb .add-lost-row input:focus, .tab-content#tabWb .add-lost-row textarea:focus { border-color: #9b4dff; }
 
-        .tab-content#tabWb .card-title {
-            color: #6b2fa0;
-        }
-
-        .tab-content#tabWb .card-title .count {
-            background: #e8d5ff;
-            color: #6b2fa0;
-        }
-
-        .tab-content#tabWb .chat-messages {
-            background: #f3ecff;
-        }
-
-        .tab-content#tabWb .msg {
-            border-left-color: #9b4dff;
-        }
-
-        .tab-content#tabWb .msg strong {
-            color: #7b2fbe;
-        }
-
-        .tab-content#tabWb .msg-input-row button {
-            background: linear-gradient(135deg, #9b4dff, #6b2fa0);
-        }
-
-        .tab-content#tabWb .msg-input-row button:hover {
-            box-shadow: 0 4px 15px rgba(155, 77, 255, 0.4);
-        }
-
-        .tab-content#tabWb .task-item {
-            background: #f3ecff;
-            border-left-color: #9b4dff;
-        }
-
-        .tab-content#tabWb .task-item .task-text {
-            color: #4a1a6b;
-        }
-
-        .tab-content#tabWb .task-item .task-actions select {
-            border-color: #d5b8ff;
-            background: white;
-        }
-
-        .tab-content#tabWb .task-item .task-actions .delete-btn {
-            background: #9b4dff;
-        }
-
-        .tab-content#tabWb .task-item .task-actions .delete-btn:hover {
-            background: #6b2fa0;
-        }
-
-        .tab-content#tabWb .add-task-row input {
-            border-color: #d5b8ff;
-            background: #faf5ff;
-        }
-
-        .tab-content#tabWb .add-task-row input:focus {
-            border-color: #9b4dff;
-            box-shadow: 0 0 0 4px rgba(155, 77, 255, 0.1);
-        }
-
-        .tab-content#tabWb .add-task-row select {
-            border-color: #d5b8ff;
-            background: white;
-        }
-
-        .tab-content#tabWb .add-task-row button {
-            background: linear-gradient(135deg, #9b4dff, #6b2fa0);
-        }
-
-        .tab-content#tabWb .add-task-row button:hover {
-            box-shadow: 0 4px 15px rgba(155, 77, 255, 0.3);
-        }
-
-        .tab-content#tabWb .empty-state {
-            color: #b89fd6;
-        }
-
-        /* ===== АДАПТИВ ===== */
         @media (max-width: 900px) {
-            .tab-content.active {
-                flex-direction: column;
-            }
-            .card {
-                max-height: 50vh;
-            }
-            .header {
-                padding: 12px 16px;
-                flex-direction: column;
-                align-items: stretch;
-                text-align: center;
-            }
-            .user-panel {
-                justify-content: center;
-            }
-            .main-content {
-                padding: 16px;
-            }
-            .tabs {
-                justify-content: center;
-            }
-            .tab-btn {
-                padding: 8px 18px;
-                font-size: 14px;
-            }
-            .login-card {
-                padding: 30px 24px;
-            }
-            .delivery-banner {
-                padding: 30px 20px;
-            }
-            .loading-logo {
-                font-size: 32px;
-            }
-            .status-phrase {
-                font-size: 15px;
-            }
+            .tab-content.active { flex-direction: column; }
+            .card { max-height: 50vh; }
+            .header { padding: 12px 16px; flex-direction: column; align-items: stretch; text-align: center; }
+            .user-panel { justify-content: center; }
+            .main-content { padding: 16px; }
+            .tabs { justify-content: center; }
+            .tab-btn { padding: 8px 18px; font-size: 14px; }
+            .login-card { padding: 30px 24px; }
+            .delivery-banner { padding: 30px 20px; }
+            .loading-logo { font-size: 32px; }
+            .status-phrase { font-size: 15px; }
+            .lost-items-grid { grid-template-columns: 1fr; }
+            .add-lost-row { grid-template-columns: 1fr; }
         }
-
         @media (max-width: 500px) {
-            .msg-input-row {
-                flex-wrap: wrap;
-            }
-            .msg-input-row button {
-                flex: 1;
-            }
-            .add-task-row {
-                flex-wrap: wrap;
-            }
-            .add-task-row button {
-                flex: 1;
-            }
-            .task-item {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .task-item .task-actions {
-                justify-content: flex-end;
-            }
+            .msg-input-row { flex-wrap: wrap; }
+            .msg-input-row button { flex: 1; }
+            .add-task-row { flex-wrap: wrap; }
+            .add-task-row button { flex: 1; }
+            .task-item { flex-direction: column; align-items: stretch; }
+            .task-item .task-actions { justify-content: flex-end; }
+            .lost-items-grid { grid-template-columns: 1fr; }
+            .add-lost-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -801,13 +273,9 @@
 <!-- ===== ЭКРАН ЗАГРУЗКИ ===== -->
 <div class="loading-screen" id="loadingScreen">
     <div class="loading-logo">OzonWeb</div>
-    <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
-    </div>
+    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
     <div class="progress-text" id="progressText">0%</div>
-    <div class="status-phrase" id="statusPhrase">
-        <span class="emoji">📦</span> Разбираем посылки
-    </div>
+    <div class="status-phrase" id="statusPhrase"><span class="emoji">📦</span> Разбираем посылки</div>
 </div>
 
 <!-- ===== ЭКРАН ВХОДА ===== -->
@@ -815,16 +283,12 @@
     <div class="login-card">
         <h1>🔐 Ozon WorkHub</h1>
         <div class="sub">Войдите в рабочий портал</div>
-        
         <label>👤 Имя пользователя</label>
         <input type="text" id="loginUsername" placeholder="Введите ваше имя">
-        
         <label>🔑 Пароль</label>
         <input type="password" id="loginPassword" placeholder="Введите пароль">
-        
         <button class="login-btn" id="loginBtn">🚀 Войти</button>
         <div class="login-error" id="loginError"></div>
-        
         <div class="login-users">
             <p><strong>👤 Александр</strong> — пароль: <strong>••••••••</strong></p>
             <p><strong>👤 Сергей</strong> — пароль: <strong>••••••••</strong></p>
@@ -842,9 +306,7 @@
             <h1>Ozon · WorkHub</h1>
         </div>
         <div class="user-panel">
-            <div class="user-badge">
-                <span>👤</span> <span id="currentUserName">Гость</span>
-            </div>
+            <div class="user-badge"><span>👤</span> <span id="currentUserName">Гость</span></div>
             <button class="logout-btn" id="logoutBtn">Выйти</button>
         </div>
     </div>
@@ -856,19 +318,11 @@
             <button class="tab-btn" data-tab="delivery">🚚 Доставка</button>
         </div>
 
-        <!-- ВКЛАДКА OZON (СИНИЙ СТИЛЬ) -->
+        <!-- ===== ВКЛАДКА OZON ===== -->
         <div class="tab-content active" id="tabOzon">
             <div class="card">
-                <div class="card-title">
-                    💬 Чат Ozon
-                    <small>онлайн</small>
-                </div>
-                <div class="chat-messages" id="chatOzon">
-                    <div class="empty-state">
-                        <div class="icon">💬</div>
-                        <p>Нет сообщений</p>
-                    </div>
-                </div>
+                <div class="card-title">💬 Чат Ozon <small>онлайн</small></div>
+                <div class="chat-messages" id="chatOzon"><div class="empty-state"><div class="icon">💬</div><p>Нет сообщений</p></div></div>
                 <div class="msg-input-row">
                     <input type="text" id="ozonMsgInput" placeholder="Напишите сообщение...">
                     <button id="ozonSendBtn">Отправить</button>
@@ -880,33 +334,38 @@
                     📋 Задачи Ozon
                     <span class="count" id="ozonTaskCount">0</span>
                 </div>
-                <div class="task-list" id="tasksOzon">
-                    <div class="empty-state">
-                        <div class="icon">📝</div>
-                        <p>Нет задач</p>
-                    </div>
-                </div>
+                <div class="task-list" id="tasksOzon"><div class="empty-state"><div class="icon">📝</div><p>Нет задач</p></div></div>
                 <div class="add-task-row">
                     <input type="text" id="ozonTaskInput" placeholder="Новая задача...">
                     <select id="ozonAssignSelect"></select>
                     <button id="ozonTaskAdd">+</button>
                 </div>
+                <div style="margin-top: 8px; font-size: 12px; color: #999;">
+                    🔒 Только создатель задачи может изменять или удалять её
+                </div>
+            </div>
+
+            <!-- Потерянные товары Ozon -->
+            <div class="card" style="border-left: 4px solid #ff9800;">
+                <div class="card-title">
+                    🔍 Потерянные товары Ozon
+                    <span class="count" id="ozonLostCount">0</span>
+                </div>
+                <div class="lost-items-grid" id="ozonLostItems"><div class="empty-state"><div class="icon">🔍</div><p>Нет потерянных товаров</p></div></div>
+                <div class="add-lost-row">
+                    <input type="text" id="ozonLostSku" placeholder="ШК товара (цифры с буквами)">
+                    <input type="text" id="ozonLostWhere" placeholder="Где должен быть товар">
+                    <textarea id="ozonLostDesc" placeholder="Описание: как потерялся, обстоятельства..."></textarea>
+                    <button class="lost-btn" id="ozonLostAdd">➕ Добавить потерянный товар</button>
+                </div>
             </div>
         </div>
 
-        <!-- ВКЛАДКА WB (ФИОЛЕТОВЫЙ СТИЛЬ) -->
+        <!-- ===== ВКЛАДКА WB ===== -->
         <div class="tab-content" id="tabWb">
             <div class="card">
-                <div class="card-title">
-                    💬 Чат WB
-                    <small>онлайн</small>
-                </div>
-                <div class="chat-messages" id="chatWb">
-                    <div class="empty-state">
-                        <div class="icon">💬</div>
-                        <p>Нет сообщений</p>
-                    </div>
-                </div>
+                <div class="card-title">💬 Чат WB <small>онлайн</small></div>
+                <div class="chat-messages" id="chatWb"><div class="empty-state"><div class="icon">💬</div><p>Нет сообщений</p></div></div>
                 <div class="msg-input-row">
                     <input type="text" id="wbMsgInput" placeholder="Напишите сообщение...">
                     <button id="wbSendBtn">Отправить</button>
@@ -918,21 +377,34 @@
                     📋 Задачи WB
                     <span class="count" id="wbTaskCount">0</span>
                 </div>
-                <div class="task-list" id="tasksWb">
-                    <div class="empty-state">
-                        <div class="icon">📝</div>
-                        <p>Нет задач</p>
-                    </div>
-                </div>
+                <div class="task-list" id="tasksWb"><div class="empty-state"><div class="icon">📝</div><p>Нет задач</p></div></div>
                 <div class="add-task-row">
                     <input type="text" id="wbTaskInput" placeholder="Новая задача...">
                     <select id="wbAssignSelect"></select>
                     <button id="wbTaskAdd">+</button>
                 </div>
+                <div style="margin-top: 8px; font-size: 12px; color: #999;">
+                    🔒 Только создатель задачи может изменять или удалять её
+                </div>
+            </div>
+
+            <!-- Потерянные товары WB -->
+            <div class="card" style="border-left: 4px solid #ff9800;">
+                <div class="card-title">
+                    🔍 Потерянные товары WB
+                    <span class="count" id="wbLostCount">0</span>
+                </div>
+                <div class="lost-items-grid" id="wbLostItems"><div class="empty-state"><div class="icon">🔍</div><p>Нет потерянных товаров</p></div></div>
+                <div class="add-lost-row">
+                    <input type="text" id="wbLostSku" placeholder="ШК товара (цифры с буквами)">
+                    <input type="text" id="wbLostWhere" placeholder="Где должен быть товар">
+                    <textarea id="wbLostDesc" placeholder="Описание: как потерялся, обстоятельства..."></textarea>
+                    <button class="lost-btn" id="wbLostAdd">➕ Добавить потерянный товар</button>
+                </div>
             </div>
         </div>
 
-        <!-- ВКЛАДКА ДОСТАВКА -->
+        <!-- ===== ВКЛАДКА ДОСТАВКА ===== -->
         <div class="tab-content" id="tabDelivery">
             <div class="delivery-content">
                 <div class="delivery-banner">
@@ -1040,6 +512,7 @@
     const logoutBtn = document.getElementById('logoutBtn');
     const currentUserName = document.getElementById('currentUserName');
 
+    // Чаты
     const chatOzon = document.getElementById('chatOzon');
     const chatWb = document.getElementById('chatWb');
     const ozonMsgInput = document.getElementById('ozonMsgInput');
@@ -1047,6 +520,7 @@
     const ozonSendBtn = document.getElementById('ozonSendBtn');
     const wbSendBtn = document.getElementById('wbSendBtn');
 
+    // Задачи
     const tasksOzon = document.getElementById('tasksOzon');
     const tasksWb = document.getElementById('tasksWb');
     const ozonTaskInput = document.getElementById('ozonTaskInput');
@@ -1057,6 +531,20 @@
     const wbTaskAdd = document.getElementById('wbTaskAdd');
     const ozonTaskCount = document.getElementById('ozonTaskCount');
     const wbTaskCount = document.getElementById('wbTaskCount');
+
+    // Потерянные товары
+    const ozonLostItems = document.getElementById('ozonLostItems');
+    const wbLostItems = document.getElementById('wbLostItems');
+    const ozonLostCount = document.getElementById('ozonLostCount');
+    const wbLostCount = document.getElementById('wbLostCount');
+    const ozonLostSku = document.getElementById('ozonLostSku');
+    const ozonLostWhere = document.getElementById('ozonLostWhere');
+    const ozonLostDesc = document.getElementById('ozonLostDesc');
+    const ozonLostAdd = document.getElementById('ozonLostAdd');
+    const wbLostSku = document.getElementById('wbLostSku');
+    const wbLostWhere = document.getElementById('wbLostWhere');
+    const wbLostDesc = document.getElementById('wbLostDesc');
+    const wbLostAdd = document.getElementById('wbLostAdd');
 
     // ============================================================
     // ФУНКЦИИ РЕНДЕРИНГА
@@ -1092,18 +580,21 @@
         tasks.forEach((task, index) => {
             const div = document.createElement('div');
             div.className = 'task-item';
+            const isCreator = task.createdBy === currentUser;
             div.innerHTML = `
                 <span class="task-text">${task.text}</span>
                 <div class="task-actions">
-                    <select data-chat="${chatKey}" data-index="${index}">
+                    <select data-chat="${chatKey}" data-index="${index}" ${!isCreator ? 'disabled' : ''}>
                         ${USERS.map(u => `<option value="${u}" ${u === task.assign ? 'selected' : ''}>${u}</option>`).join('')}
                     </select>
-                    <button class="delete-btn" data-chat="${chatKey}" data-index="${index}">✕</button>
+                    <button class="delete-btn" data-chat="${chatKey}" data-index="${index}" ${!isCreator ? 'disabled' : ''}>✕</button>
+                    <span class="task-author" title="Создатель: ${task.createdBy || 'неизвестен'}">👤${task.createdBy || '?'}</span>
                 </div>
             `;
             container.appendChild(div);
 
             div.querySelector('select').addEventListener('change', function(e) {
+                if (!isCreator) return;
                 const chatKey = this.dataset.chat;
                 const taskIndex = parseInt(this.dataset.index);
                 const newAssign = this.value;
@@ -1111,9 +602,70 @@
             });
 
             div.querySelector('.delete-btn').addEventListener('click', function(e) {
+                if (!isCreator) return;
                 const chatKey = this.dataset.chat;
                 const taskIndex = parseInt(this.dataset.index);
                 deleteTask(chatKey, taskIndex);
+            });
+        });
+    }
+
+    function renderLostItems(container, items, chatKey, countElement) {
+        container.innerHTML = '';
+        if (!items || items.length === 0) {
+            container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>Нет потерянных товаров</p></div>`;
+            if (countElement) countElement.textContent = '0';
+            return;
+        }
+
+        if (countElement) countElement.textContent = items.length;
+
+        items.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'lost-item-card';
+            const isCreator = item.createdBy === currentUser;
+            
+            const statusMap = {
+                'Поиск': 'status-search',
+                'Утерян': 'status-lost',
+                'Нашелся': 'status-found'
+            };
+            const statusClass = statusMap[item.status] || 'status-search';
+
+            div.innerHTML = `
+                <div class="item-header">
+                    <span class="sku">📦 ${item.sku || 'Без ШК'}</span>
+                    <span class="status ${statusClass}">${item.status || 'Поиск'}</span>
+                </div>
+                <div class="item-description">${item.description || 'Нет описания'}</div>
+                <div class="item-meta">
+                    <span>📍 ${item.where || 'Место не указано'}</span>
+                    <span>👤 ${item.createdBy || 'Неизвестно'}</span>
+                </div>
+                <div class="item-actions">
+                    <select data-chat="${chatKey}" data-index="${index}" ${!isCreator ? 'disabled' : ''}>
+                        <option value="Поиск" ${item.status === 'Поиск' ? 'selected' : ''}>🔍 Поиск</option>
+                        <option value="Утерян" ${item.status === 'Утерян' ? 'selected' : ''}>❌ Утерян</option>
+                        <option value="Нашелся" ${item.status === 'Нашелся' ? 'selected' : ''}>✅ Нашелся</option>
+                    </select>
+                    <button class="delete-lost-btn" data-chat="${chatKey}" data-index="${index}" ${!isCreator ? 'disabled' : ''}>✕</button>
+                </div>
+            `;
+            container.appendChild(div);
+
+            div.querySelector('select').addEventListener('change', function(e) {
+                if (!isCreator) return;
+                const chatKey = this.dataset.chat;
+                const itemIndex = parseInt(this.dataset.index);
+                const newStatus = this.value;
+                updateLostItemStatus(chatKey, itemIndex, newStatus);
+            });
+
+            div.querySelector('.delete-lost-btn').addEventListener('click', function(e) {
+                if (!isCreator) return;
+                const chatKey = this.dataset.chat;
+                const itemIndex = parseInt(this.dataset.index);
+                deleteLostItem(chatKey, itemIndex);
             });
         });
     }
@@ -1134,49 +686,53 @@
     // FIREBASE ФУНКЦИИ
     // ============================================================
     function loadData() {
+        // Чаты
         database.ref('chats/ozon').on('value', (snapshot) => {
             renderChat(chatOzon, snapshot.val() || []);
         });
-
         database.ref('chats/wb').on('value', (snapshot) => {
             renderChat(chatWb, snapshot.val() || []);
         });
 
+        // Задачи
         database.ref('tasks/ozon').on('value', (snapshot) => {
             renderTasks(tasksOzon, snapshot.val() || [], 'ozon');
         });
-
         database.ref('tasks/wb').on('value', (snapshot) => {
             renderTasks(tasksWb, snapshot.val() || [], 'wb');
         });
+
+        // Потерянные товары
+        database.ref('lost/ozon').on('value', (snapshot) => {
+            renderLostItems(ozonLostItems, snapshot.val() || [], 'ozon', ozonLostCount);
+        });
+        database.ref('lost/wb').on('value', (snapshot) => {
+            renderLostItems(wbLostItems, snapshot.val() || [], 'wb', wbLostCount);
+        });
     }
 
+    // ===== ЧАТЫ =====
     function sendMessage(chatKey, inputElement) {
         const text = inputElement.value.trim();
         if (!text || !currentUser) return;
-
         const chatRef = database.ref(`chats/${chatKey}`);
         chatRef.once('value').then((snapshot) => {
             const messages = snapshot.val() || [];
-            messages.push({
-                author: currentUser,
-                text: text,
-                timestamp: Date.now()
-            });
+            messages.push({ author: currentUser, text, timestamp: Date.now() });
             return chatRef.set(messages);
         }).catch(() => {});
         inputElement.value = '';
     }
 
+    // ===== ЗАДАЧИ =====
     function addTask(chatKey, inputElement, selectElement) {
         const text = inputElement.value.trim();
         if (!text || !currentUser) return;
         const assign = selectElement.value || 'не назначен';
-
         const taskRef = database.ref(`tasks/${chatKey}`);
         taskRef.once('value').then((snapshot) => {
             const tasks = snapshot.val() || [];
-            tasks.push({ text, assign });
+            tasks.push({ text, assign, createdBy: currentUser });
             return taskRef.set(tasks);
         }).catch(() => {});
         inputElement.value = '';
@@ -1199,6 +755,44 @@
             const tasks = snapshot.val() || [];
             tasks.splice(taskIndex, 1);
             return taskRef.set(tasks);
+        }).catch(() => {});
+    }
+
+    // ===== ПОТЕРЯННЫЕ ТОВАРЫ =====
+    function addLostItem(chatKey, sku, where, description) {
+        if (!sku.trim() || !currentUser) return;
+        const lostRef = database.ref(`lost/${chatKey}`);
+        lostRef.once('value').then((snapshot) => {
+            const items = snapshot.val() || [];
+            items.push({
+                sku: sku.trim(),
+                where: where.trim() || 'Не указано',
+                description: description.trim() || 'Нет описания',
+                status: 'Поиск',
+                createdBy: currentUser,
+                timestamp: Date.now()
+            });
+            return lostRef.set(items);
+        }).catch(() => {});
+    }
+
+    function updateLostItemStatus(chatKey, itemIndex, newStatus) {
+        const lostRef = database.ref(`lost/${chatKey}`);
+        lostRef.once('value').then((snapshot) => {
+            const items = snapshot.val() || [];
+            if (items[itemIndex]) {
+                items[itemIndex].status = newStatus;
+                return lostRef.set(items);
+            }
+        }).catch(() => {});
+    }
+
+    function deleteLostItem(chatKey, itemIndex) {
+        const lostRef = database.ref(`lost/${chatKey}`);
+        lostRef.once('value').then((snapshot) => {
+            const items = snapshot.val() || [];
+            items.splice(itemIndex, 1);
+            return lostRef.set(items);
         }).catch(() => {});
     }
 
@@ -1245,6 +839,8 @@
         database.ref('chats/wb').off();
         database.ref('tasks/ozon').off();
         database.ref('tasks/wb').off();
+        database.ref('lost/ozon').off();
+        database.ref('lost/wb').off();
     }
 
     // ============================================================
@@ -1253,19 +849,35 @@
     loginBtn.addEventListener('click', login);
     loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
     loginUsername.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
-
     logoutBtn.addEventListener('click', logout);
 
+    // Чаты
     ozonSendBtn.addEventListener('click', () => sendMessage('ozon', ozonMsgInput));
     wbSendBtn.addEventListener('click', () => sendMessage('wb', wbMsgInput));
     ozonMsgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage('ozon', ozonMsgInput); });
     wbMsgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage('wb', wbMsgInput); });
 
+    // Задачи
     ozonTaskAdd.addEventListener('click', () => addTask('ozon', ozonTaskInput, ozonAssignSelect));
     wbTaskAdd.addEventListener('click', () => addTask('wb', wbTaskInput, wbAssignSelect));
     ozonTaskInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') ozonTaskAdd.click(); });
     wbTaskInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') wbTaskAdd.click(); });
 
+    // Потерянные товары
+    ozonLostAdd.addEventListener('click', () => {
+        addLostItem('ozon', ozonLostSku.value, ozonLostWhere.value, ozonLostDesc.value);
+        ozonLostSku.value = '';
+        ozonLostWhere.value = '';
+        ozonLostDesc.value = '';
+    });
+    wbLostAdd.addEventListener('click', () => {
+        addLostItem('wb', wbLostSku.value, wbLostWhere.value, wbLostDesc.value);
+        wbLostSku.value = '';
+        wbLostWhere.value = '';
+        wbLostDesc.value = '';
+    });
+
+    // Вкладки
     document.getElementById('tabHeaders').addEventListener('click', (e) => {
         const btn = e.target.closest('.tab-btn');
         if (!btn) return;
