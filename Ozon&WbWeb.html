@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ozon · WorkHub</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0edf5;
+            overflow: hidden;
+        }
+
+        /* ===== ЭКРАН ЗАГРУЗКИ ===== */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0f3460 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-logo {
+            font-size: 52px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #005bff, #7f3bff, #ff2d6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress-container {
+            width: 320px;
+            max-width: 80%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #005bff, #7f3bff, #ff2d6b);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            color: rgba(255,255,255,0.5);
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .status-phrase {
+            color: rgba(255,255,255,0.8);
+            font-size: 18px;
+            font-weight: 300;
+            min-height: 30px;
+            text-align: center;
+        }
+
+        .status-phrase .emoji {
+            margin-right: 8px;
+        }
+
+        /* ===== ЭКРАН ВХОДА ===== */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0f3460 100%);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .login-overlay.active {
+            display: flex;
+        }
+
+        .login-card {
+            background: rgba(255,255,255,0.95);
+            padding: 45px 40px;
+            border-radius: 30px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .login-card h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+
+        .login-card .sub {
+            color: #888;
+            font-size: 15px;
+            margin-bottom: 28px;
+        }
+
+        .login-card label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e0dce8;
+            border-radius: 14px;
+            font-size: 16px;
+            background: #f8f6fc;
+            margin-bottom: 16px;
+            transition: 0.3s;
+        }
+
+        .login-card input:focus {
+            border-color: #005bff;
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0,91,255,0.1);
+        }
+
+        .login-card .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #005bff, #7f3bff);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 8px;
+        }
+
+        .login-card .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,91,255,0.35);
+        }
+
+        .login-error {
+            color: #ff2d6b;
+            text-align: center;
+            margin-top: 12px;
+            font-weight: 500;
+            font-size: 14px;
+            min-height: 22px;
+        }
+
+        .login-users {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f5f3ff;
+            border-radius: 14px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .login-users p {
+            margin: 3px 0;
+        }
+
+        .login-users strong {
+            color: #1a1a2e;
+        }
+
+        .login-users .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* ===== ОСНОВНОЙ ИНТЕРФЕЙС ===== */
+        .app-wrapper {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            background: #f0edf5;
+            flex-direction: column;
+        }
+
+        .app-wrapper.active {
+            display: flex;
+        }
+
+        /* ===== ШАПКА ===== */
+        .header {
+            background: linear-gradient(135deg, #005bff 0%, #7f3bff 50%, #ff2d6b 100%);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 12px;
+            min-height: 72px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon {
+            background: white;
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+            color: #005bff;
+        }
+
+        .logo-area h1 {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-badge {
+            background: rgba(255,255,255,0.15);
+            padding: 8px 22px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 22px;
+            border-radius: 50px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        .main-content {
+            flex: 1;
+            padding: 24px 32px 32px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== ВКЛАДКИ ===== */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0dce8;
+            padding-bottom: 4px;
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            padding: 12px 32px;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 600;
+            color: #777;
+            cursor: pointer;
+            border-radius: 12px 12px 0 0;
+            transition: 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: #e8e4f0;
+            color: #333;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #005bff, #7f3bff);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,91,255,0.25);
+        }
+
+        /* ===== КОНТЕНТ ВКЛАДОК ===== */
+        .tab-content {
+            display: none;
+            flex: 1;
+            animation: fadeIn 0.3s ease;
+            overflow: hidden;
+        }
+
+        .tab-content.active {
+            display: flex;
+            gap: 24px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== КАРТОЧКИ ===== */
+        .card {
+            flex: 1;
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #edeaf5;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .card-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .card-title small {
+            font-size: 13px;
+            font-weight: 400;
+            color: #999;
+            margin-left: auto;
+        }
+
+        .card-title .count {
+            background: #f0edf5;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        /* ===== ЧАТ ===== */
+        .chat-messages {
+            flex: 1;
+            background: #f8f6fc;
+            border-radius: 16px;
+            padding: 16px;
+            overflow-y: auto;
+            margin-bottom: 14px;
+            min-height: 200px;
+            max-height: calc(100vh - 380px);
+        }
+
+        .msg {
+            background: white;
+            padding: 10px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #005bff;
+        }
+
+        .msg strong {
+            color: #005bff;
+            display: block;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .msg .time {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        .msg-input-row {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .msg-input-row input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e0dce8;
+            border-radius: 14px;
+            font-size: 15px;
+            background: #f8f6fc;
+            min-width: 0;
+        }
+
+        .msg-input-row input:focus {
+            border-color: #005bff;
+            outline: none;
+            background: white;
+        }
+
+        .msg-input-row button {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #005bff, #7f3bff);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+
+        .msg-input-row button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0,91,255,0.3);
+        }
+
+        /* ===== ЗАДАЧИ ===== */
+        .task-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 14px;
+            min-height: 150px;
+            max-height: calc(100vh - 380px);
+        }
+
+        .task-item {
+            background: #f8f6fc;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #ff2d6b;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .task-item .task-text {
+            font-weight: 500;
+            color: #1a1a2e;
+            word-break: break-word;
+        }
+
+        .task-item .task-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .task-item .task-actions select {
+            padding: 5px 10px;
+            border: 2px solid #e0dce8;
+            border-radius: 8px;
+            font-size: 13px;
+            background: white;
+        }
+
+        .task-item .task-actions .delete-btn {
+            background: #ff2d6b;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .task-item .task-actions .delete-btn:hover {
+            background: #cc0044;
+            transform: scale(1.05);
+        }
+
+        .add-task-row {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .add-task-row input {
+            flex: 2;
+            padding: 12px 18px;
+            border: 2px solid #e0dce8;
+            border-radius: 14px;
+            font-size: 15px;
+            background: #f8f6fc;
+            min-width: 0;
+        }
+
+        .add-task-row input:focus {
+            border-color: #005bff;
+            outline: none;
+            background: white;
+        }
+
+        .add-task-row select {
+            padding: 12px 16px;
+            border: 2px solid #e0dce8;
+            border-radius: 14px;
+            font-size: 14px;
+            background: white;
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .add-task-row button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #ff2d6b, #b82c8c);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+
+        .add-task-row button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255,45,107,0.3);
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 150px;
+            color: #bbb;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: 15px;
+        }
+
+        /* ===== ДОСТАВКА ===== */
+        .delivery-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delivery-banner {
+            background: linear-gradient(135deg, #f8f6fc, #edeaf5);
+            border-radius: 30px;
+            padding: 60px 80px;
+            text-align: center;
+            border: 2px dashed #d5cce8;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .delivery-banner .icon {
+            font-size: 72px;
+            margin-bottom: 16px;
+        }
+
+        .delivery-banner h2 {
+            font-size: 30px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .delivery-banner p {
+            color: #888;
+            font-size: 17px;
+        }
+
+        .delivery-banner .badge {
+            display: inline-block;
+            background: white;
+            padding: 8px 28px;
+            border-radius: 50px;
+            margin-top: 16px;
+            font-weight: 600;
+            color: #005bff;
+        }
+
+        /* ===== ФИОЛЕТОВЫЙ СТИЛЬ ДЛЯ WB ===== */
+        .tab-content#tabWb .card {
+            border-color: #d5b8ff;
+            background: #faf5ff;
+        }
+
+        .tab-content#tabWb .card-title {
+            color: #6b2fa0;
+        }
+
+        .tab-content#tabWb .card-title .count {
+            background: #e8d5ff;
+            color: #6b2fa0;
+        }
+
+        .tab-content#tabWb .chat-messages {
+            background: #f3ecff;
+        }
+
+        .tab-content#tabWb .msg {
+            border-left-color: #9b4dff;
+        }
+
+        .tab-content#tabWb .msg strong {
+            color: #7b2fbe;
+        }
+
+        .tab-content#tabWb .msg-input-row button {
+            background: linear-gradient(135deg, #9b4dff, #6b2fa0);
+        }
+
+        .tab-content#tabWb .msg-input-row button:hover {
+            box-shadow: 0 4px 15px rgba(155, 77, 255, 0.4);
+        }
+
+        .tab-content#tabWb .task-item {
+            background: #f3ecff;
+            border-left-color: #9b4dff;
+        }
+
+        .tab-content#tabWb .task-item .task-text {
+            color: #4a1a6b;
+        }
+
+        .tab-content#tabWb .task-item .task-actions select {
+            border-color: #d5b8ff;
+            background: white;
+        }
+
+        .tab-content#tabWb .task-item .task-actions .delete-btn {
+            background: #9b4dff;
+        }
+
+        .tab-content#tabWb .task-item .task-actions .delete-btn:hover {
+            background: #6b2fa0;
+        }
+
+        .tab-content#tabWb .add-task-row input {
+            border-color: #d5b8ff;
+            background: #faf5ff;
+        }
+
+        .tab-content#tabWb .add-task-row input:focus {
+            border-color: #9b4dff;
+            box-shadow: 0 0 0 4px rgba(155, 77, 255, 0.1);
+        }
+
+        .tab-content#tabWb .add-task-row select {
+            border-color: #d5b8ff;
+            background: white;
+        }
+
+        .tab-content#tabWb .add-task-row button {
+            background: linear-gradient(135deg, #9b4dff, #6b2fa0);
+        }
+
+        .tab-content#tabWb .add-task-row button:hover {
+            box-shadow: 0 4px 15px rgba(155, 77, 255, 0.3);
+        }
+
+        .tab-content#tabWb .empty-state {
+            color: #b89fd6;
+        }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 900px) {
+            .tab-content.active {
+                flex-direction: column;
+            }
+            .card {
+                max-height: 50vh;
+            }
+            .header {
+                padding: 12px 16px;
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .user-panel {
+                justify-content: center;
+            }
+            .main-content {
+                padding: 16px;
+            }
+            .tabs {
+                justify-content: center;
+            }
+            .tab-btn {
+                padding: 8px 18px;
+                font-size: 14px;
+            }
+            .login-card {
+                padding: 30px 24px;
+            }
+            .delivery-banner {
+                padding: 30px 20px;
+            }
+            .loading-logo {
+                font-size: 32px;
+            }
+            .status-phrase {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .msg-input-row {
+                flex-wrap: wrap;
+            }
+            .msg-input-row button {
+                flex: 1;
+            }
+            .add-task-row {
+                flex-wrap: wrap;
+            }
+            .add-task-row button {
+                flex: 1;
+            }
+            .task-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .task-item .task-actions {
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== ЭКРАН ЗАГРУЗКИ ===== -->
+<div class="loading-screen" id="loadingScreen">
+    <div class="loading-logo">OzonWeb</div>
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="progressText">0%</div>
+    <div class="status-phrase" id="statusPhrase">
+        <span class="emoji">📦</span> Разбираем посылки
+    </div>
+</div>
+
+<!-- ===== ЭКРАН ВХОДА ===== -->
+<div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+        <h1>🔐 Ozon WorkHub</h1>
+        <div class="sub">Войдите в рабочий портал</div>
+        
+        <label>👤 Имя пользователя</label>
+        <input type="text" id="loginUsername" placeholder="Введите ваше имя">
+        
+        <label>🔑 Пароль</label>
+        <input type="password" id="loginPassword" placeholder="Введите пароль">
+        
+        <button class="login-btn" id="loginBtn">🚀 Войти</button>
+        <div class="login-error" id="loginError"></div>
+        
+        <div class="login-users">
+            <p><strong>👤 Александр</strong> — пароль: <strong>••••••••</strong></p>
+            <p><strong>👤 Сергей</strong> — пароль: <strong>••••••••</strong></p>
+            <p><strong>👤 Данила</strong> — пароль: <strong>••••••••</strong></p>
+            <div class="hint">⚠️ Пароли скрыты для безопасности</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== ОСНОВНОЙ ИНТЕРФЕЙС ===== -->
+<div class="app-wrapper" id="appWrapper">
+    <div class="header">
+        <div class="logo-area">
+            <div class="logo-icon">O</div>
+            <h1>Ozon · WorkHub</h1>
+        </div>
+        <div class="user-panel">
+            <div class="user-badge">
+                <span>👤</span> <span id="currentUserName">Гость</span>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Выйти</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="tabs" id="tabHeaders">
+            <button class="tab-btn active" data-tab="ozon">📦 Ozon</button>
+            <button class="tab-btn" data-tab="wb">🛒 WB</button>
+            <button class="tab-btn" data-tab="delivery">🚚 Доставка</button>
+        </div>
+
+        <!-- ВКЛАДКА OZON (СИНИЙ СТИЛЬ) -->
+        <div class="tab-content active" id="tabOzon">
+            <div class="card">
+                <div class="card-title">
+                    💬 Чат Ozon
+                    <small>онлайн</small>
+                </div>
+                <div class="chat-messages" id="chatOzon">
+                    <div class="empty-state">
+                        <div class="icon">💬</div>
+                        <p>Нет сообщений</p>
+                    </div>
+                </div>
+                <div class="msg-input-row">
+                    <input type="text" id="ozonMsgInput" placeholder="Напишите сообщение...">
+                    <button id="ozonSendBtn">Отправить</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    📋 Задачи Ozon
+                    <span class="count" id="ozonTaskCount">0</span>
+                </div>
+                <div class="task-list" id="tasksOzon">
+                    <div class="empty-state">
+                        <div class="icon">📝</div>
+                        <p>Нет задач</p>
+                    </div>
+                </div>
+                <div class="add-task-row">
+                    <input type="text" id="ozonTaskInput" placeholder="Новая задача...">
+                    <select id="ozonAssignSelect"></select>
+                    <button id="ozonTaskAdd">+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ВКЛАДКА WB (ФИОЛЕТОВЫЙ СТИЛЬ) -->
+        <div class="tab-content" id="tabWb">
+            <div class="card">
+                <div class="card-title">
+                    💬 Чат WB
+                    <small>онлайн</small>
+                </div>
+                <div class="chat-messages" id="chatWb">
+                    <div class="empty-state">
+                        <div class="icon">💬</div>
+                        <p>Нет сообщений</p>
+                    </div>
+                </div>
+                <div class="msg-input-row">
+                    <input type="text" id="wbMsgInput" placeholder="Напишите сообщение...">
+                    <button id="wbSendBtn">Отправить</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    📋 Задачи WB
+                    <span class="count" id="wbTaskCount">0</span>
+                </div>
+                <div class="task-list" id="tasksWb">
+                    <div class="empty-state">
+                        <div class="icon">📝</div>
+                        <p>Нет задач</p>
+                    </div>
+                </div>
+                <div class="add-task-row">
+                    <input type="text" id="wbTaskInput" placeholder="Новая задача...">
+                    <select id="wbAssignSelect"></select>
+                    <button id="wbTaskAdd">+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ВКЛАДКА ДОСТАВКА -->
+        <div class="tab-content" id="tabDelivery">
+            <div class="delivery-content">
+                <div class="delivery-banner">
+                    <div class="icon">🚚</div>
+                    <h2>Доставка Ozon & WB</h2>
+                    <p>Скоро здесь появится управление заказами и трекингом</p>
+                    <div class="badge">🚧 В разработке</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 🔥 FIREBASE КОНФИГУРАЦИЯ
+    // ============================================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyDAsDPGgbpx85dlwUkg3fibLndV5DTBSWI",
+        authDomain: "ozon-workhub.firebaseapp.com",
+        databaseURL: "https://ozon-workhub-default-rtdb.firebaseio.com",
+        projectId: "ozon-workhub",
+        storageBucket: "ozon-workhub.firebasestorage.app",
+        messagingSenderId: "340903219027",
+        appId: "1:340903219027:web:6e4ccc8b0baef0636cdba6",
+        measurementId: "G-W8SEVBP5DT"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // ============================================================
+    // ДАННЫЕ
+    // ============================================================
+    const USERS = ['Александр', 'Сергей', 'Данила'];
+    const USER_PASSWORDS = {
+        'Александр': 'OzonWeb1',
+        'Сергей': 'OzonWeb3',
+        'Данила': 'OzonWeb2'
+    };
+
+    let currentUser = null;
+
+    // ============================================================
+    // ЭКРАН ЗАГРУЗКИ
+    // ============================================================
+    const loadingScreen = document.getElementById('loadingScreen');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const statusPhrase = document.getElementById('statusPhrase');
+
+    const phrases = [
+        { emoji: '📦', text: 'Разбираем посылки' },
+        { emoji: '🚚', text: 'Готовим курьеров' },
+        { emoji: '🏗️', text: 'Строим ПВЗ' },
+        { emoji: '📞', text: 'Зовем Коч Сергея' }
+    ];
+
+    let currentPhraseIndex = 0;
+    let phraseInterval;
+
+    function showNextPhrase() {
+        const phrase = phrases[currentPhraseIndex];
+        statusPhrase.innerHTML = `<span class="emoji">${phrase.emoji}</span> ${phrase.text}`;
+        currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
+    }
+
+    function startPhraseRotation() {
+        showNextPhrase();
+        phraseInterval = setInterval(showNextPhrase, 2000);
+    }
+
+    let progress = 0;
+    let loadingComplete = false;
+
+    function simulateLoading() {
+        if (loadingComplete) return;
+        const step = Math.random() * 3 + 1;
+        progress = Math.min(progress + step, 100);
+        progressBar.style.width = progress + '%';
+        progressText.textContent = Math.round(progress) + '%';
+
+        if (progress >= 100) {
+            loadingComplete = true;
+            clearInterval(phraseInterval);
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                loginOverlay.classList.add('active');
+            }, 500);
+            return;
+        }
+        const delay = Math.random() * 200 + 100;
+        setTimeout(simulateLoading, delay);
+    }
+
+    // ============================================================
+    // DOM ЭЛЕМЕНТЫ
+    // ============================================================
+    const loginOverlay = document.getElementById('loginOverlay');
+    const appWrapper = document.getElementById('appWrapper');
+    const loginUsername = document.getElementById('loginUsername');
+    const loginPassword = document.getElementById('loginPassword');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginError = document.getElementById('loginError');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const currentUserName = document.getElementById('currentUserName');
+
+    const chatOzon = document.getElementById('chatOzon');
+    const chatWb = document.getElementById('chatWb');
+    const ozonMsgInput = document.getElementById('ozonMsgInput');
+    const wbMsgInput = document.getElementById('wbMsgInput');
+    const ozonSendBtn = document.getElementById('ozonSendBtn');
+    const wbSendBtn = document.getElementById('wbSendBtn');
+
+    const tasksOzon = document.getElementById('tasksOzon');
+    const tasksWb = document.getElementById('tasksWb');
+    const ozonTaskInput = document.getElementById('ozonTaskInput');
+    const wbTaskInput = document.getElementById('wbTaskInput');
+    const ozonAssignSelect = document.getElementById('ozonAssignSelect');
+    const wbAssignSelect = document.getElementById('wbAssignSelect');
+    const ozonTaskAdd = document.getElementById('ozonTaskAdd');
+    const wbTaskAdd = document.getElementById('wbTaskAdd');
+    const ozonTaskCount = document.getElementById('ozonTaskCount');
+    const wbTaskCount = document.getElementById('wbTaskCount');
+
+    // ============================================================
+    // ФУНКЦИИ РЕНДЕРИНГА
+    // ============================================================
+    function renderChat(container, messages) {
+        container.innerHTML = '';
+        if (!messages || messages.length === 0) {
+            container.innerHTML = `<div class="empty-state"><div class="icon">💬</div><p>Нет сообщений</p></div>`;
+            return;
+        }
+        messages.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = 'msg';
+            const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString() : '';
+            div.innerHTML = `<strong>${msg.author}</strong><div>${msg.text}</div>${time ? `<div class="time">${time}</div>` : ''}`;
+            container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function renderTasks(container, tasks, chatKey) {
+        container.innerHTML = '';
+        if (!tasks || tasks.length === 0) {
+            container.innerHTML = `<div class="empty-state"><div class="icon">📝</div><p>Нет задач</p></div>`;
+            if (chatKey === 'ozon') ozonTaskCount.textContent = '0';
+            else wbTaskCount.textContent = '0';
+            return;
+        }
+
+        if (chatKey === 'ozon') ozonTaskCount.textContent = tasks.length;
+        else wbTaskCount.textContent = tasks.length;
+
+        tasks.forEach((task, index) => {
+            const div = document.createElement('div');
+            div.className = 'task-item';
+            div.innerHTML = `
+                <span class="task-text">${task.text}</span>
+                <div class="task-actions">
+                    <select data-chat="${chatKey}" data-index="${index}">
+                        ${USERS.map(u => `<option value="${u}" ${u === task.assign ? 'selected' : ''}>${u}</option>`).join('')}
+                    </select>
+                    <button class="delete-btn" data-chat="${chatKey}" data-index="${index}">✕</button>
+                </div>
+            `;
+            container.appendChild(div);
+
+            div.querySelector('select').addEventListener('change', function(e) {
+                const chatKey = this.dataset.chat;
+                const taskIndex = parseInt(this.dataset.index);
+                const newAssign = this.value;
+                updateTask(chatKey, taskIndex, newAssign);
+            });
+
+            div.querySelector('.delete-btn').addEventListener('click', function(e) {
+                const chatKey = this.dataset.chat;
+                const taskIndex = parseInt(this.dataset.index);
+                deleteTask(chatKey, taskIndex);
+            });
+        });
+    }
+
+    function updateSelects() {
+        [ozonAssignSelect, wbAssignSelect].forEach(sel => {
+            sel.innerHTML = '';
+            USERS.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u;
+                opt.textContent = u;
+                sel.appendChild(opt);
+            });
+        });
+    }
+
+    // ============================================================
+    // FIREBASE ФУНКЦИИ
+    // ============================================================
+    function loadData() {
+        database.ref('chats/ozon').on('value', (snapshot) => {
+            renderChat(chatOzon, snapshot.val() || []);
+        });
+
+        database.ref('chats/wb').on('value', (snapshot) => {
+            renderChat(chatWb, snapshot.val() || []);
+        });
+
+        database.ref('tasks/ozon').on('value', (snapshot) => {
+            renderTasks(tasksOzon, snapshot.val() || [], 'ozon');
+        });
+
+        database.ref('tasks/wb').on('value', (snapshot) => {
+            renderTasks(tasksWb, snapshot.val() || [], 'wb');
+        });
+    }
+
+    function sendMessage(chatKey, inputElement) {
+        const text = inputElement.value.trim();
+        if (!text || !currentUser) return;
+
+        const chatRef = database.ref(`chats/${chatKey}`);
+        chatRef.once('value').then((snapshot) => {
+            const messages = snapshot.val() || [];
+            messages.push({
+                author: currentUser,
+                text: text,
+                timestamp: Date.now()
+            });
+            return chatRef.set(messages);
+        }).catch(() => {});
+        inputElement.value = '';
+    }
+
+    function addTask(chatKey, inputElement, selectElement) {
+        const text = inputElement.value.trim();
+        if (!text || !currentUser) return;
+        const assign = selectElement.value || 'не назначен';
+
+        const taskRef = database.ref(`tasks/${chatKey}`);
+        taskRef.once('value').then((snapshot) => {
+            const tasks = snapshot.val() || [];
+            tasks.push({ text, assign });
+            return taskRef.set(tasks);
+        }).catch(() => {});
+        inputElement.value = '';
+    }
+
+    function updateTask(chatKey, taskIndex, newAssign) {
+        const taskRef = database.ref(`tasks/${chatKey}`);
+        taskRef.once('value').then((snapshot) => {
+            const tasks = snapshot.val() || [];
+            if (tasks[taskIndex]) {
+                tasks[taskIndex].assign = newAssign;
+                return taskRef.set(tasks);
+            }
+        }).catch(() => {});
+    }
+
+    function deleteTask(chatKey, taskIndex) {
+        const taskRef = database.ref(`tasks/${chatKey}`);
+        taskRef.once('value').then((snapshot) => {
+            const tasks = snapshot.val() || [];
+            tasks.splice(taskIndex, 1);
+            return taskRef.set(tasks);
+        }).catch(() => {});
+    }
+
+    // ============================================================
+    // ЛОГИН / ЛОГАУТ
+    // ============================================================
+    function login() {
+        const username = loginUsername.value.trim();
+        const password = loginPassword.value.trim();
+
+        if (!username || !password) {
+            loginError.textContent = '❌ Заполните все поля!';
+            return;
+        }
+
+        if (!USERS.includes(username)) {
+            loginError.textContent = '❌ Пользователь не найден!';
+            return;
+        }
+
+        if (USER_PASSWORDS[username] !== password) {
+            loginError.textContent = '❌ Неверный пароль!';
+            return;
+        }
+
+        currentUser = username;
+        loginOverlay.classList.remove('active');
+        appWrapper.classList.add('active');
+        currentUserName.textContent = username;
+        updateSelects();
+        loginError.textContent = '';
+        loadData();
+    }
+
+    function logout() {
+        currentUser = null;
+        appWrapper.classList.remove('active');
+        loginOverlay.classList.add('active');
+        loginUsername.value = '';
+        loginPassword.value = '';
+        loginError.textContent = '';
+        
+        database.ref('chats/ozon').off();
+        database.ref('chats/wb').off();
+        database.ref('tasks/ozon').off();
+        database.ref('tasks/wb').off();
+    }
+
+    // ============================================================
+    // СОБЫТИЯ
+    // ============================================================
+    loginBtn.addEventListener('click', login);
+    loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+    loginUsername.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+
+    logoutBtn.addEventListener('click', logout);
+
+    ozonSendBtn.addEventListener('click', () => sendMessage('ozon', ozonMsgInput));
+    wbSendBtn.addEventListener('click', () => sendMessage('wb', wbMsgInput));
+    ozonMsgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage('ozon', ozonMsgInput); });
+    wbMsgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage('wb', wbMsgInput); });
+
+    ozonTaskAdd.addEventListener('click', () => addTask('ozon', ozonTaskInput, ozonAssignSelect));
+    wbTaskAdd.addEventListener('click', () => addTask('wb', wbTaskInput, wbAssignSelect));
+    ozonTaskInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') ozonTaskAdd.click(); });
+    wbTaskInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') wbTaskAdd.click(); });
+
+    document.getElementById('tabHeaders').addEventListener('click', (e) => {
+        const btn = e.target.closest('.tab-btn');
+        if (!btn) return;
+        const tab = btn.dataset.tab;
+        
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        const targetId = tab === 'ozon' ? 'tabOzon' : tab === 'wb' ? 'tabWb' : 'tabDelivery';
+        document.getElementById(targetId).classList.add('active');
+    });
+
+    // ============================================================
+    // СТАРТ
+    // ============================================================
+    startPhraseRotation();
+    setTimeout(simulateLoading, 500);
+    updateSelects();
+</script>
+</body>
+</html>
