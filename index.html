@@ -225,15 +225,7 @@
             gap: 24px;
             padding: 20px;
         }
-
-        .delivery-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            width: 100%;
-            max-width: 800px;
-        }
-
+        .delivery-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; max-width: 800px; }
         .delivery-card {
             background: rgba(255,255,255,0.85);
             backdrop-filter: blur(12px);
@@ -298,6 +290,126 @@
         .status-receiving { color: #005bff; background: rgba(0,91,255,0.1); }
         .status-received { color: #4caf50; background: rgba(76,175,80,0.1); }
 
+        /* ===== ГРАФИК РАБОТ ===== */
+        .schedule-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow: hidden;
+            padding: 4px 0;
+        }
+        .schedule-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 16px 24px;
+            border-radius: 16px;
+            flex-shrink: 0;
+        }
+        .schedule-nav { display: flex; align-items: center; gap: 16px; }
+        .schedule-nav button {
+            background: rgba(0,0,0,0.05);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .schedule-nav button:hover { background: rgba(0,0,0,0.1); }
+        .schedule-month { font-size: 22px; font-weight: 700; color: #1a1a2e; min-width: 160px; text-align: center; }
+        .schedule-info { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #888; }
+        .schedule-info strong { color: #1a1a2e; }
+        .schedule-today-btn {
+            padding: 6px 16px;
+            background: linear-gradient(135deg, #005bff, #7f3bff);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .schedule-today-btn:hover { transform: scale(1.03); box-shadow: 0 4px 12px rgba(0,91,255,0.25); }
+
+        .schedule-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            flex-shrink: 0;
+            padding: 0 4px;
+        }
+        .schedule-weekday {
+            text-align: center;
+            font-weight: 700;
+            color: #888;
+            padding: 8px 0;
+            background: rgba(255,255,255,0.4);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .schedule-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            overflow-y: auto;
+            padding: 0 4px 4px 4px;
+            align-content: start;
+        }
+        .schedule-cell {
+            background: rgba(255,255,255,0.6);
+            border-radius: 10px;
+            padding: 6px 8px;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: 0.3s;
+        }
+        .schedule-cell.today {
+            background: rgba(0, 91, 255, 0.12);
+            border: 2px solid #005bff;
+        }
+        .schedule-cell .date {
+            font-weight: 600;
+            font-size: 13px;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+        .schedule-cell.today .date { color: #005bff; }
+        .schedule-cell .employee-row {
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 2px;
+        }
+        .schedule-cell .employee-row .label { font-size: 12px; }
+        .schedule-cell .employee-row input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 11px;
+            outline: none;
+            padding: 2px 4px;
+            border-radius: 4px;
+            min-width: 0;
+            width: 100%;
+        }
+        .schedule-cell .employee-row input:focus { background: rgba(255,255,255,0.5); }
+        .schedule-cell .employee-row input:disabled { cursor: not-allowed; opacity: 0.6; }
+        .schedule-cell .employee-row .ozon-input { color: #005bff; }
+        .schedule-cell .employee-row .wb-input { color: #9b4dff; }
+        .schedule-cell .employee-row .ozon-label { color: #005bff; }
+        .schedule-cell .employee-row .wb-label { color: #9b4dff; }
+
         .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 150px; color: rgba(255,255,255,0.5); }
         .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
 
@@ -338,6 +450,14 @@
             .add-lost-row { grid-template-columns: 1fr; }
             .delivery-status { flex-direction: column; align-items: center; text-align: center; }
             .delivery-card .count { font-size: 40px; }
+            .schedule-grid { grid-template-columns: repeat(7, 1fr); }
+            .schedule-cell { min-height: 50px; padding: 4px; }
+            .schedule-cell .date { font-size: 11px; }
+            .schedule-cell .employee-row input { font-size: 9px; }
+            .schedule-month { font-size: 18px; min-width: 120px; }
+            .schedule-header { flex-direction: column; align-items: stretch; text-align: center; }
+            .schedule-nav { justify-content: center; }
+            .schedule-info { justify-content: center; }
         }
         @media (max-width: 500px) {
             .msg-input-row { flex-wrap: wrap; }
@@ -348,6 +468,14 @@
             .task-item .task-actions { justify-content: flex-end; }
             .delivery-card .controls { flex-direction: column; }
             .delivery-card .controls input { width: 100%; }
+            .schedule-grid { grid-template-columns: repeat(7, 1fr); gap: 2px; }
+            .schedule-cell { min-height: 44px; padding: 3px; }
+            .schedule-cell .date { font-size: 9px; }
+            .schedule-cell .employee-row { font-size: 8px; flex-wrap: wrap; }
+            .schedule-cell .employee-row input { font-size: 8px; padding: 1px 2px; }
+            .schedule-weekday { font-size: 10px; padding: 4px 0; }
+            .schedule-month { font-size: 16px; min-width: 100px; }
+            .schedule-nav button { width: 28px; height: 28px; font-size: 14px; }
         }
     </style>
 </head>
@@ -399,6 +527,7 @@
             <button class="tab-btn active" data-tab="ozon">📦 Ozon</button>
             <button class="tab-btn" data-tab="wb">🛒 WB</button>
             <button class="tab-btn" data-tab="delivery">🚚 Доставка</button>
+            <button class="tab-btn" data-tab="schedule">📅 График</button>
         </div>
 
         <!-- ===== ВКЛАДКА OZON ===== -->
@@ -472,7 +601,6 @@
         <!-- ===== ВКЛАДКА ДОСТАВКА ===== -->
         <div class="tab-content" id="tabDelivery">
             <div class="delivery-content">
-                <!-- Счетчики -->
                 <div class="delivery-stats">
                     <div class="delivery-card" style="border-color: rgba(0,91,255,0.3);">
                         <div class="icon">📦</div>
@@ -501,7 +629,6 @@
                     </div>
                 </div>
 
-                <!-- Статус доставки -->
                 <div class="delivery-status">
                     <div>
                         <span class="status-label">📊 Статус доставки:</span>
@@ -514,6 +641,38 @@
                     </div>
                     <div style="font-size: 12px; color: #999;">🔒 Только Данила может менять статус</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- ===== ВКЛАДКА ГРАФИК РАБОТ ===== -->
+        <div class="tab-content" id="tabSchedule">
+            <div class="schedule-content">
+                <!-- Заголовок -->
+                <div class="schedule-header">
+                    <div class="schedule-nav">
+                        <button id="schedulePrevMonth">◀</button>
+                        <span class="schedule-month" id="scheduleMonthYear">Январь 2026</span>
+                        <button id="scheduleNextMonth">▶</button>
+                    </div>
+                    <div class="schedule-info">
+                        <span>🔒 Только <strong>Данила</strong> может редактировать</span>
+                        <button class="schedule-today-btn" id="scheduleTodayBtn">📅 Сегодня</button>
+                    </div>
+                </div>
+
+                <!-- Дни недели -->
+                <div class="schedule-weekdays">
+                    <div class="schedule-weekday">ПН</div>
+                    <div class="schedule-weekday">ВТ</div>
+                    <div class="schedule-weekday">СР</div>
+                    <div class="schedule-weekday">ЧТ</div>
+                    <div class="schedule-weekday">ПТ</div>
+                    <div class="schedule-weekday">СБ</div>
+                    <div class="schedule-weekday">ВС</div>
+                </div>
+
+                <!-- Сетка календаря -->
+                <div class="schedule-grid" id="scheduleGrid"></div>
             </div>
         </div>
     </div>
@@ -658,12 +817,17 @@
     const wbDeliveryBtn = document.getElementById('wbDeliveryBtn');
     const ozonDeliveryLock = document.getElementById('ozonDeliveryLock');
     const wbDeliveryLock = document.getElementById('wbDeliveryLock');
-    const ozonDeliveryControls = document.getElementById('ozonDeliveryControls');
-    const wbDeliveryControls = document.getElementById('wbDeliveryControls');
     const deliveryStatusDisplay = document.getElementById('deliveryStatusDisplay');
     const statusGoing = document.getElementById('statusGoing');
     const statusReceiving = document.getElementById('statusReceiving');
     const statusReceived = document.getElementById('statusReceived');
+
+    // График работ
+    const scheduleGrid = document.getElementById('scheduleGrid');
+    const scheduleMonthYear = document.getElementById('scheduleMonthYear');
+    const schedulePrevMonth = document.getElementById('schedulePrevMonth');
+    const scheduleNextMonth = document.getElementById('scheduleNextMonth');
+    const scheduleTodayBtn = document.getElementById('scheduleTodayBtn');
 
     // ============================================================
     // ФУНКЦИИ РЕНДЕРИНГА
@@ -805,7 +969,6 @@
     // ДОСТАВКА
     // ============================================================
     function loadDeliveryData() {
-        // Ozon доставка
         database.ref('delivery/ozon').on('value', (snapshot) => {
             const data = snapshot.val() || { count: 0, updatedBy: '—' };
             ozonDeliveryCount.textContent = data.count || 0;
@@ -813,7 +976,6 @@
             updateDeliveryUI('ozon', data.updatedBy);
         });
 
-        // WB доставка
         database.ref('delivery/wb').on('value', (snapshot) => {
             const data = snapshot.val() || { count: 0, updatedBy: '—' };
             wbDeliveryCount.textContent = data.count || 0;
@@ -821,7 +983,6 @@
             updateDeliveryUI('wb', data.updatedBy);
         });
 
-        // Статус доставки
         database.ref('delivery/status').on('value', (snapshot) => {
             const status = snapshot.val() || '—';
             updateDeliveryStatusUI(status);
@@ -857,13 +1018,11 @@
         else if (status === 'Принимаем') deliveryStatusDisplay.classList.add('status-receiving');
         else if (status === 'Принято') deliveryStatusDisplay.classList.add('status-received');
 
-        // Обновляем активную кнопку
         [statusGoing, statusReceiving, statusReceived].forEach(btn => {
             btn.classList.remove('active-status');
             if (btn.dataset.status === status) btn.classList.add('active-status');
         });
 
-        // Блокируем кнопки если не Данила
         const isDanila = currentUser === 'Данила';
         [statusGoing, statusReceiving, statusReceived].forEach(btn => {
             btn.disabled = !isDanila;
@@ -912,6 +1071,126 @@
     }
 
     // ============================================================
+    // ГРАФИК РАБОТ (Календарь)
+    // ============================================================
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+    let scheduleData = {};
+
+    function loadScheduleData() {
+        database.ref('schedule').on('value', (snapshot) => {
+            scheduleData = snapshot.val() || {};
+            renderSchedule(currentMonth, currentYear);
+        });
+    }
+
+    function saveScheduleData() {
+        database.ref('schedule').set(scheduleData).catch((error) => {
+            console.error('❌ Ошибка сохранения графика:', error);
+            alert('❌ Ошибка сохранения! Проверьте подключение.');
+        });
+    }
+
+    function getDayKey(day, month, year) {
+        return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function renderSchedule(month, year) {
+        const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+        scheduleMonthYear.textContent = `${monthNames[month]} ${year}`;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+
+        scheduleGrid.innerHTML = '';
+
+        for (let i = 0; i < startOffset; i++) {
+            const empty = document.createElement('div');
+            empty.style.cssText = 'background: rgba(255,255,255,0.15); border-radius: 8px; min-height: 70px;';
+            scheduleGrid.appendChild(empty);
+        }
+
+        const today = new Date();
+        const isDanila = currentUser === 'Данила';
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const cell = document.createElement('div');
+            const dayKey = getDayKey(day, month, year);
+            const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+            const dayData = scheduleData[dayKey] || { ozon: '', wb: '' };
+            
+            cell.className = 'schedule-cell' + (isToday ? ' today' : '');
+            cell.style.cssText = `
+                background: ${isToday ? 'rgba(0, 91, 255, 0.12)' : 'rgba(255,255,255,0.6)'};
+                border-radius: 10px;
+                padding: 6px 8px;
+                min-height: 70px;
+                display: flex;
+                flex-direction: column;
+                border: ${isToday ? '2px solid #005bff' : '1px solid rgba(255,255,255,0.3)'};
+                transition: 0.3s;
+            `;
+            
+            // Дата
+            const dateDiv = document.createElement('div');
+            dateDiv.className = 'date';
+            dateDiv.textContent = day;
+            cell.appendChild(dateDiv);
+
+            // Ozon
+            const ozonRow = document.createElement('div');
+            ozonRow.className = 'employee-row';
+            const ozonLabel = document.createElement('span');
+            ozonLabel.className = 'label ozon-label';
+            ozonLabel.textContent = '📦';
+            ozonRow.appendChild(ozonLabel);
+            
+            const ozonInput = document.createElement('input');
+            ozonInput.className = 'ozon-input';
+            ozonInput.type = 'text';
+            ozonInput.placeholder = 'Ozon';
+            ozonInput.value = dayData.ozon || '';
+            ozonInput.disabled = !isDanila;
+            ozonInput.addEventListener('change', function() {
+                if (!isDanila) return;
+                const key = getDayKey(day, month, year);
+                if (!scheduleData[key]) scheduleData[key] = { ozon: '', wb: '' };
+                scheduleData[key].ozon = this.value;
+                saveScheduleData();
+            });
+            ozonRow.appendChild(ozonInput);
+            cell.appendChild(ozonRow);
+
+            // WB
+            const wbRow = document.createElement('div');
+            wbRow.className = 'employee-row';
+            const wbLabel = document.createElement('span');
+            wbLabel.className = 'label wb-label';
+            wbLabel.textContent = '🛒';
+            wbRow.appendChild(wbLabel);
+            
+            const wbInput = document.createElement('input');
+            wbInput.className = 'wb-input';
+            wbInput.type = 'text';
+            wbInput.placeholder = 'WB';
+            wbInput.value = dayData.wb || '';
+            wbInput.disabled = !isDanila;
+            wbInput.addEventListener('change', function() {
+                if (!isDanila) return;
+                const key = getDayKey(day, month, year);
+                if (!scheduleData[key]) scheduleData[key] = { ozon: '', wb: '' };
+                scheduleData[key].wb = this.value;
+                saveScheduleData();
+            });
+            wbRow.appendChild(wbInput);
+            cell.appendChild(wbRow);
+
+            scheduleGrid.appendChild(cell);
+        }
+    }
+
+    // ============================================================
     // FIREBASE ФУНКЦИИ
     // ============================================================
     function loadData() {
@@ -941,6 +1220,9 @@
 
         // Доставка
         loadDeliveryData();
+
+        // График работ
+        loadScheduleData();
     }
 
     // ===== ЧАТЫ =====
@@ -1006,6 +1288,9 @@
             });
             return lostRef.set(items);
         }).catch(() => {});
+        ozonLostSku.value = '';
+        ozonLostWhere.value = '';
+        ozonLostDesc.value = '';
     }
 
     function updateLostItemStatus(chatKey, itemIndex, newStatus) {
@@ -1076,6 +1361,7 @@
         database.ref('delivery/ozon').off();
         database.ref('delivery/wb').off();
         database.ref('delivery/status').off();
+        database.ref('schedule').off();
     }
 
     // ============================================================
@@ -1101,15 +1387,9 @@
     // Потерянные товары
     ozonLostAdd.addEventListener('click', () => {
         addLostItem('ozon', ozonLostSku.value, ozonLostWhere.value, ozonLostDesc.value);
-        ozonLostSku.value = '';
-        ozonLostWhere.value = '';
-        ozonLostDesc.value = '';
     });
     wbLostAdd.addEventListener('click', () => {
         addLostItem('wb', wbLostSku.value, wbLostWhere.value, wbLostDesc.value);
-        wbLostSku.value = '';
-        wbLostWhere.value = '';
-        wbLostDesc.value = '';
     });
 
     // Доставка - счетчики
@@ -1123,6 +1403,26 @@
     statusReceiving.addEventListener('click', () => updateDeliveryStatus('Принимаем'));
     statusReceived.addEventListener('click', () => updateDeliveryStatus('Принято'));
 
+    // График работ - навигация
+    schedulePrevMonth.addEventListener('click', () => {
+        currentMonth--;
+        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+        renderSchedule(currentMonth, currentYear);
+    });
+
+    scheduleNextMonth.addEventListener('click', () => {
+        currentMonth++;
+        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+        renderSchedule(currentMonth, currentYear);
+    });
+
+    scheduleTodayBtn.addEventListener('click', () => {
+        const today = new Date();
+        currentMonth = today.getMonth();
+        currentYear = today.getFullYear();
+        renderSchedule(currentMonth, currentYear);
+    });
+
     // Вкладки
     document.getElementById('tabHeaders').addEventListener('click', (e) => {
         const btn = e.target.closest('.tab-btn');
@@ -1133,7 +1433,7 @@
         btn.classList.add('active');
         
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        const targetId = tab === 'ozon' ? 'tabOzon' : tab === 'wb' ? 'tabWb' : 'tabDelivery';
+        const targetId = tab === 'ozon' ? 'tabOzon' : tab === 'wb' ? 'tabWb' : tab === 'delivery' ? 'tabDelivery' : 'tabSchedule';
         document.getElementById(targetId).classList.add('active');
     });
 
@@ -1143,6 +1443,7 @@
     startPhraseRotation();
     setTimeout(simulateLoading, 500);
     updateSelects();
+    console.log('✅ Ozon WorkHub загружен!');
 </script>
 </body>
 </html>
