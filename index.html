@@ -10,13 +10,30 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
+        /* ===== ОБНУЛЕНИЕ ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0edf5; overflow: hidden; }
+        html, body { width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+
+        /* ===== КРАСИВЫЙ ФОН ===== */
+        html {
+            background-image: url('https://img.magnific.com/premium-psd/misty-mountain-forest_538547-11187.jpg?semt=ais_hybrid&w=740&q=80') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-attachment: fixed !important;
+            background-repeat: no-repeat !important;
+            min-height: 100vh !important;
+        }
+
+        body {
+            background: rgba(0, 0, 0, 0.25) !important;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
 
         /* ===== ЭКРАН ЗАГРУЗКИ ===== */
         .loading-screen {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0f3460 100%);
+            background: rgba(10, 10, 26, 0.92);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 10000; transition: opacity 0.8s ease;
         }
@@ -31,7 +48,9 @@
         /* ===== ЭКРАН ВХОДА ===== */
         .login-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0f3460 100%);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: none; justify-content: center; align-items: center; z-index: 9999;
         }
         .login-overlay.active { display: flex; }
@@ -55,191 +74,255 @@
         .login-users .hint { font-size: 12px; color: #999; margin-top: 8px; text-align: center; }
 
         /* ===== ОСНОВНОЙ ИНТЕРФЕЙС ===== */
-        .app-wrapper { display: none; width: 100vw; height: 100vh; background: #f0edf5; flex-direction: column; }
+        .app-wrapper {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            flex-direction: column;
+        }
         .app-wrapper.active { display: flex; }
 
+        /* ===== ШАПКА ===== */
         .header {
-            background: linear-gradient(135deg, #005bff 0%, #7f3bff 50%, #ff2d6b 100%);
-            padding: 16px 32px; display: flex; justify-content: space-between; align-items: center;
-            flex-shrink: 0; flex-wrap: wrap; gap: 12px; min-height: 72px;
+            background: rgba(0, 20, 40, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 12px;
+            min-height: 72px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
         .logo-area { display: flex; align-items: center; gap: 14px; }
         .logo-icon { background: white; width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #005bff; }
         .logo-area h1 { color: white; font-size: 24px; font-weight: 700; }
         .user-panel { display: flex; align-items: center; gap: 16px; }
-        .user-badge { background: rgba(255,255,255,0.15); padding: 8px 22px; border-radius: 50px; color: white; font-weight: 500; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 10px; font-size: 15px; }
-        .logout-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 22px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: 0.3s; font-size: 14px; }
-        .logout-btn:hover { background: rgba(255,255,255,0.25); }
+        .user-badge { background: rgba(255,255,255,0.12); padding: 8px 22px; border-radius: 50px; color: white; font-weight: 500; border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; gap: 10px; font-size: 15px; backdrop-filter: blur(4px); }
+        .logout-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: white; padding: 8px 22px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: 0.3s; font-size: 14px; }
+        .logout-btn:hover { background: rgba(255,255,255,0.2); }
 
-        .main-content { flex: 1; padding: 24px 32px 32px; overflow: hidden; display: flex; flex-direction: column; }
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        .main-content {
+            flex: 1;
+            padding: 24px 32px 32px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255,255,255,0.06);
+        }
 
         /* ===== ВКЛАДКИ ===== */
         .tabs {
-            display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 2px solid #e0dce8;
+            display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08);
             padding-bottom: 4px; flex-shrink: 0; flex-wrap: wrap;
         }
         .tab-btn {
-            padding: 12px 32px; border: none; background: transparent; font-size: 16px;
-            font-weight: 600; color: #777; cursor: pointer; border-radius: 12px 12px 0 0;
-            transition: 0.3s;
+            padding: 12px 28px; border: none; background: rgba(255,255,255,0.05); font-size: 15px;
+            font-weight: 600; color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 12px 12px 0 0;
+            transition: 0.3s; backdrop-filter: blur(4px);
         }
-        .tab-btn:hover { background: #e8e4f0; color: #333; }
-        .tab-btn.active { background: linear-gradient(135deg, #005bff, #7f3bff); color: white; box-shadow: 0 4px 15px rgba(0,91,255,0.25); }
+        .tab-btn:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); }
+        .tab-btn.active { background: rgba(255,255,255,0.15); color: white; box-shadow: 0 4px 20px rgba(0,91,255,0.15); }
 
-        .tab-content { display: none; flex: 1; animation: fadeIn 0.3s ease; overflow: hidden; }
-        .tab-content.active { display: flex; gap: 24px; }
+        /* ===== КОНТЕНТ ВКЛАДОК ===== */
+        .tab-content { display: none; flex: 1; animation: fadeIn 0.3s ease; overflow: hidden; gap: 20px; }
+        .tab-content.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card { flex: 1; background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid #edeaf5; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
-        .card-title { font-size: 19px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        /* ===== КАРТОЧКИ ===== */
+        .card {
+            flex: 1;
+            background: rgba(255,255,255,0.78);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .card-title {
+            font-size: 19px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+        }
         .card-title small { font-size: 13px; font-weight: 400; color: #999; margin-left: auto; }
-        .card-title .count { background: #f0edf5; padding: 2px 12px; border-radius: 50px; font-size: 13px; font-weight: 600; color: #555; }
+        .card-title .count { background: rgba(0,0,0,0.05); padding: 2px 12px; border-radius: 50px; font-size: 13px; font-weight: 600; color: #555; }
 
         /* ===== ЧАТ ===== */
-        .chat-messages { flex: 1; background: #f8f6fc; border-radius: 16px; padding: 16px; overflow-y: auto; margin-bottom: 14px; min-height: 200px; max-height: calc(100vh - 380px); }
-        .msg { background: white; padding: 10px 16px; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid #005bff; }
+        .chat-messages {
+            flex: 1;
+            background: rgba(255,255,255,0.4);
+            border-radius: 16px;
+            padding: 16px;
+            overflow-y: auto;
+            margin-bottom: 14px;
+            min-height: 200px;
+            max-height: calc(100vh - 380px);
+        }
+        .msg { background: white; padding: 10px 16px; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid #005bff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
         .msg strong { color: #005bff; display: block; font-size: 13px; margin-bottom: 3px; }
         .msg .time { font-size: 11px; color: #aaa; margin-top: 4px; }
         .msg-input-row { display: flex; gap: 10px; flex-shrink: 0; }
-        .msg-input-row input { flex: 1; padding: 12px 18px; border: 2px solid #e0dce8; border-radius: 14px; font-size: 15px; background: #f8f6fc; min-width: 0; }
+        .msg-input-row input { flex: 1; padding: 12px 18px; border: 2px solid rgba(0,0,0,0.08); border-radius: 14px; font-size: 15px; background: rgba(255,255,255,0.6); min-width: 0; backdrop-filter: blur(4px); }
         .msg-input-row input:focus { border-color: #005bff; outline: none; background: white; }
-        .msg-input-row button { padding: 12px 28px; background: linear-gradient(135deg, #005bff, #7f3bff); color: white; border: none; border-radius: 14px; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.3s; white-space: nowrap; }
-        .msg-input-row button:hover { transform: scale(1.02); box-shadow: 0 4px 15px rgba(0,91,255,0.3); }
+        .msg-input-row button { padding: 12px 28px; background: linear-gradient(135deg, #005bff, #7f3bff); color: white; border: none; border-radius: 14px; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.3s; white-space: nowrap; box-shadow: 0 4px 15px rgba(0,91,255,0.2); }
+        .msg-input-row button:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(0,91,255,0.3); }
 
         /* ===== ЗАДАЧИ ===== */
         .task-list { flex: 1; overflow-y: auto; margin-bottom: 14px; min-height: 150px; max-height: calc(100vh - 380px); }
-        .task-item { background: #f8f6fc; padding: 12px 16px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ff2d6b; gap: 10px; flex-wrap: wrap; }
+        .task-item { background: rgba(255,255,255,0.6); padding: 12px 16px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ff2d6b; gap: 10px; flex-wrap: wrap; }
         .task-item .task-text { font-weight: 500; color: #1a1a2e; word-break: break-word; }
         .task-item .task-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .task-item .task-actions select { padding: 5px 10px; border: 2px solid #e0dce8; border-radius: 8px; font-size: 13px; background: white; cursor: pointer; }
+        .task-item .task-actions select { padding: 5px 10px; border: 2px solid rgba(0,0,0,0.08); border-radius: 8px; font-size: 13px; background: white; cursor: pointer; }
         .task-item .task-actions select:disabled { opacity: 0.5; cursor: not-allowed; }
         .task-item .task-actions .delete-btn { background: #ff2d6b; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.3s; }
         .task-item .task-actions .delete-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .task-item .task-actions .delete-btn:hover:not(:disabled) { background: #cc0044; transform: scale(1.05); }
         .task-item .task-author { font-size: 11px; color: #999; margin-left: 10px; }
         .add-task-row { display: flex; gap: 10px; flex-shrink: 0; }
-        .add-task-row input { flex: 2; padding: 12px 18px; border: 2px solid #e0dce8; border-radius: 14px; font-size: 15px; background: #f8f6fc; min-width: 0; }
+        .add-task-row input { flex: 2; padding: 12px 18px; border: 2px solid rgba(0,0,0,0.08); border-radius: 14px; font-size: 15px; background: rgba(255,255,255,0.6); min-width: 0; backdrop-filter: blur(4px); }
         .add-task-row input:focus { border-color: #005bff; outline: none; background: white; }
-        .add-task-row select { padding: 12px 16px; border: 2px solid #e0dce8; border-radius: 14px; font-size: 14px; background: white; flex: 1; min-width: 80px; }
-        .add-task-row button { padding: 12px 24px; background: linear-gradient(135deg, #ff2d6b, #b82c8c); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 20px; cursor: pointer; transition: 0.3s; white-space: nowrap; }
-        .add-task-row button:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(255,45,107,0.3); }
+        .add-task-row select { padding: 12px 16px; border: 2px solid rgba(0,0,0,0.08); border-radius: 14px; font-size: 14px; background: white; flex: 1; min-width: 80px; }
+        .add-task-row button { padding: 12px 24px; background: linear-gradient(135deg, #ff2d6b, #b82c8c); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 20px; cursor: pointer; transition: 0.3s; white-space: nowrap; box-shadow: 0 4px 15px rgba(255,45,107,0.2); }
+        .add-task-row button:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(255,45,107,0.3); }
 
         /* ===== ПОТЕРЯННЫЕ ТОВАРЫ ===== */
-        .lost-items-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 14px;
-            min-height: 150px;
-            max-height: calc(100vh - 380px);
-        }
-        .lost-item-card {
-            background: #f8f6fc;
-            border-radius: 16px;
-            padding: 16px;
-            border-left: 4px solid #ff9800;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .lost-item-card .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .lost-item-card .item-header .sku {
-            font-weight: 700;
-            color: #1a1a2e;
-            font-size: 14px;
-        }
-        .lost-item-card .item-header .status {
-            padding: 4px 12px;
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+        .lost-items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1; overflow-y: auto; margin-bottom: 14px; min-height: 150px; max-height: calc(100vh - 380px); }
+        .lost-item-card { background: rgba(255,255,255,0.6); border-radius: 16px; padding: 16px; border-left: 4px solid #ff9800; display: flex; flex-direction: column; gap: 8px; backdrop-filter: blur(4px); }
+        .lost-item-card .item-header { display: flex; justify-content: space-between; align-items: center; }
+        .lost-item-card .item-header .sku { font-weight: 700; color: #1a1a2e; font-size: 14px; }
+        .lost-item-card .item-header .status { padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; }
         .status-search { background: #fff3cd; color: #856404; }
         .status-lost { background: #f8d7da; color: #721c24; }
         .status-found { background: #d4edda; color: #155724; }
         .lost-item-card .item-description { font-size: 14px; color: #555; word-break: break-word; }
         .lost-item-card .item-meta { font-size: 12px; color: #999; display: flex; justify-content: space-between; }
         .lost-item-card .item-actions { display: flex; gap: 8px; margin-top: 4px; }
-        .lost-item-card .item-actions select { padding: 4px 8px; border: 2px solid #e0dce8; border-radius: 8px; font-size: 12px; background: white; cursor: pointer; flex: 1; }
+        .lost-item-card .item-actions select { padding: 4px 8px; border: 2px solid rgba(0,0,0,0.08); border-radius: 8px; font-size: 12px; background: white; cursor: pointer; flex: 1; }
         .lost-item-card .item-actions .delete-lost-btn { background: #ff2d6b; color: white; border: none; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; }
         .lost-item-card .item-actions .delete-lost-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .lost-item-card .item-actions .delete-lost-btn:hover:not(:disabled) { background: #cc0044; }
-
-        .add-lost-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-        .add-lost-row input, .add-lost-row textarea {
-            padding: 12px 16px;
-            border: 2px solid #e0dce8;
-            border-radius: 14px;
-            font-size: 14px;
-            background: #f8f6fc;
-            transition: 0.3s;
-        }
-        .add-lost-row input:focus, .add-lost-row textarea:focus {
-            border-color: #005bff;
-            outline: none;
-            background: white;
-        }
+        .add-lost-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex-shrink: 0; }
+        .add-lost-row input, .add-lost-row textarea { padding: 12px 16px; border: 2px solid rgba(0,0,0,0.08); border-radius: 14px; font-size: 14px; background: rgba(255,255,255,0.6); transition: 0.3s; backdrop-filter: blur(4px); }
+        .add-lost-row input:focus, .add-lost-row textarea:focus { border-color: #005bff; outline: none; background: white; }
         .add-lost-row textarea { resize: vertical; min-height: 60px; grid-column: 1 / -1; }
-        .add-lost-row .lost-btn {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-            grid-column: 1 / -1;
-        }
-        .add-lost-row .lost-btn:hover { transform: scale(1.02); box-shadow: 0 4px 15px rgba(255,152,0,0.3); }
-
-        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 150px; color: #bbb; }
-        .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
-        .empty-state p { font-size: 15px; }
+        .add-lost-row .lost-btn { padding: 12px 24px; background: linear-gradient(135deg, #ff9800, #f57c00); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s; grid-column: 1 / -1; box-shadow: 0 4px 15px rgba(255,152,0,0.2); }
+        .add-lost-row .lost-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(255,152,0,0.3); }
 
         /* ===== ДОСТАВКА ===== */
-        .delivery-content { flex: 1; display: flex; align-items: center; justify-content: center; }
-        .delivery-banner { background: linear-gradient(135deg, #f8f6fc, #edeaf5); border-radius: 30px; padding: 60px 80px; text-align: center; border: 2px dashed #d5cce8; max-width: 600px; width: 100%; }
-        .delivery-banner .icon { font-size: 72px; margin-bottom: 16px; }
-        .delivery-banner h2 { font-size: 30px; color: #1a1a2e; margin-bottom: 8px; }
-        .delivery-banner p { color: #888; font-size: 17px; }
-        .delivery-banner .badge { display: inline-block; background: white; padding: 8px 28px; border-radius: 50px; margin-top: 16px; font-weight: 600; color: #005bff; }
+        .delivery-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            padding: 20px;
+        }
+
+        .delivery-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .delivery-card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            text-align: center;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: 0.3s;
+        }
+        .delivery-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+        .delivery-card .icon { font-size: 32px; margin-bottom: 8px; }
+        .delivery-card .label { font-size: 18px; font-weight: 600; color: #1a1a2e; }
+        .delivery-card .count { font-size: 56px; font-weight: 800; margin: 8px 0; }
+        .delivery-card .sub { font-size: 14px; color: #888; }
+        .delivery-card .meta { margin-top: 12px; font-size: 13px; color: #999; }
+        .delivery-card .controls { margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .delivery-card .controls input { width: 120px; padding: 10px 14px; border: 2px solid rgba(0,0,0,0.08); border-radius: 12px; font-size: 16px; text-align: center; background: rgba(255,255,255,0.6); }
+        .delivery-card .controls input:focus { border-color: #005bff; outline: none; background: white; }
+        .delivery-card .controls button { padding: 10px 24px; border: none; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.3s; }
+        .delivery-card .controls button:hover { transform: scale(1.03); }
+        .delivery-card .lock { margin-top: 6px; font-size: 12px; color: #aaa; }
+
+        .delivery-status {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 20px 24px;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .delivery-status .status-label { font-weight: 600; color: #1a1a2e; font-size: 16px; }
+        .delivery-status .status-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .delivery-status .status-buttons button {
+            padding: 8px 20px;
+            border: 2px solid rgba(0,0,0,0.08);
+            border-radius: 50px;
+            background: rgba(255,255,255,0.6);
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .delivery-status .status-buttons button:hover:not(:disabled) { transform: scale(1.03); }
+        .delivery-status .status-buttons button.active-status {
+            border-color: #005bff;
+            background: #005bff;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,91,255,0.25);
+        }
+        .delivery-status .status-buttons button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .delivery-status .current-status { font-weight: 600; font-size: 18px; padding: 4px 16px; border-radius: 50px; }
+        .status-going { color: #ff9800; background: rgba(255,152,0,0.1); }
+        .status-receiving { color: #005bff; background: rgba(0,91,255,0.1); }
+        .status-received { color: #4caf50; background: rgba(76,175,80,0.1); }
+
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 150px; color: rgba(255,255,255,0.5); }
+        .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
 
         /* ===== ФИОЛЕТОВЫЙ СТИЛЬ ДЛЯ WB ===== */
-        .tab-content#tabWb .card { border-color: #d5b8ff; background: #faf5ff; }
+        .tab-content#tabWb .card { background: rgba(255,255,255,0.82); border-color: rgba(155,77,255,0.2); }
         .tab-content#tabWb .card-title { color: #6b2fa0; }
         .tab-content#tabWb .card-title .count { background: #e8d5ff; color: #6b2fa0; }
-        .tab-content#tabWb .chat-messages { background: #f3ecff; }
+        .tab-content#tabWb .chat-messages { background: rgba(243,236,255,0.4); }
         .tab-content#tabWb .msg { border-left-color: #9b4dff; }
         .tab-content#tabWb .msg strong { color: #7b2fbe; }
-        .tab-content#tabWb .msg-input-row button { background: linear-gradient(135deg, #9b4dff, #6b2fa0); }
-        .tab-content#tabWb .msg-input-row button:hover { box-shadow: 0 4px 15px rgba(155,77,255,0.4); }
-        .tab-content#tabWb .task-item { background: #f3ecff; border-left-color: #9b4dff; }
+        .tab-content#tabWb .msg-input-row button { background: linear-gradient(135deg, #9b4dff, #6b2fa0); box-shadow: 0 4px 15px rgba(155,77,255,0.2); }
+        .tab-content#tabWb .task-item { background: rgba(243,236,255,0.4); border-left-color: #9b4dff; }
         .tab-content#tabWb .task-item .task-text { color: #4a1a6b; }
-        .tab-content#tabWb .task-item .task-actions select { border-color: #d5b8ff; background: white; }
+        .tab-content#tabWb .task-item .task-actions select { border-color: rgba(155,77,255,0.2); }
         .tab-content#tabWb .task-item .task-actions .delete-btn { background: #9b4dff; }
-        .tab-content#tabWb .task-item .task-actions .delete-btn:hover:not(:disabled) { background: #6b2fa0; }
-        .tab-content#tabWb .add-task-row input { border-color: #d5b8ff; background: #faf5ff; }
-        .tab-content#tabWb .add-task-row input:focus { border-color: #9b4dff; box-shadow: 0 0 0 4px rgba(155,77,255,0.1); }
-        .tab-content#tabWb .add-task-row select { border-color: #d5b8ff; background: white; }
-        .tab-content#tabWb .add-task-row button { background: linear-gradient(135deg, #9b4dff, #6b2fa0); }
-        .tab-content#tabWb .add-task-row button:hover { box-shadow: 0 4px 15px rgba(155,77,255,0.3); }
-        .tab-content#tabWb .lost-item-card { background: #f3ecff; border-left-color: #9b4dff; }
+        .tab-content#tabWb .add-task-row input { border-color: rgba(155,77,255,0.2); background: rgba(243,236,255,0.4); }
+        .tab-content#tabWb .add-task-row input:focus { border-color: #9b4dff; }
+        .tab-content#tabWb .add-task-row select { border-color: rgba(155,77,255,0.2); }
+        .tab-content#tabWb .add-task-row button { background: linear-gradient(135deg, #9b4dff, #6b2fa0); box-shadow: 0 4px 15px rgba(155,77,255,0.2); }
+        .tab-content#tabWb .lost-item-card { background: rgba(243,236,255,0.4); border-left-color: #9b4dff; }
         .tab-content#tabWb .lost-item-card .item-header .sku { color: #4a1a6b; }
-        .tab-content#tabWb .add-lost-row input, .tab-content#tabWb .add-lost-row textarea { border-color: #d5b8ff; background: #faf5ff; }
+        .tab-content#tabWb .add-lost-row input, .tab-content#tabWb .add-lost-row textarea { border-color: rgba(155,77,255,0.2); background: rgba(243,236,255,0.4); }
         .tab-content#tabWb .add-lost-row input:focus, .tab-content#tabWb .add-lost-row textarea:focus { border-color: #9b4dff; }
+        .tab-content#tabWb .delivery-card { border-color: rgba(155,77,255,0.2); }
+        .tab-content#tabWb .delivery-card .count { color: #9b4dff; }
 
         @media (max-width: 900px) {
             .tab-content.active { flex-direction: column; }
@@ -248,13 +331,13 @@
             .user-panel { justify-content: center; }
             .main-content { padding: 16px; }
             .tabs { justify-content: center; }
-            .tab-btn { padding: 8px 18px; font-size: 14px; }
+            .tab-btn { padding: 8px 16px; font-size: 13px; }
             .login-card { padding: 30px 24px; }
-            .delivery-banner { padding: 30px 20px; }
-            .loading-logo { font-size: 32px; }
-            .status-phrase { font-size: 15px; }
+            .delivery-stats { grid-template-columns: 1fr; }
             .lost-items-grid { grid-template-columns: 1fr; }
             .add-lost-row { grid-template-columns: 1fr; }
+            .delivery-status { flex-direction: column; align-items: center; text-align: center; }
+            .delivery-card .count { font-size: 40px; }
         }
         @media (max-width: 500px) {
             .msg-input-row { flex-wrap: wrap; }
@@ -263,8 +346,8 @@
             .add-task-row button { flex: 1; }
             .task-item { flex-direction: column; align-items: stretch; }
             .task-item .task-actions { justify-content: flex-end; }
-            .lost-items-grid { grid-template-columns: 1fr; }
-            .add-lost-row { grid-template-columns: 1fr; }
+            .delivery-card .controls { flex-direction: column; }
+            .delivery-card .controls input { width: 100%; }
         }
     </style>
 </head>
@@ -330,27 +413,18 @@
             </div>
 
             <div class="card">
-                <div class="card-title">
-                    📋 Задачи Ozon
-                    <span class="count" id="ozonTaskCount">0</span>
-                </div>
+                <div class="card-title">📋 Задачи Ozon <span class="count" id="ozonTaskCount">0</span></div>
                 <div class="task-list" id="tasksOzon"><div class="empty-state"><div class="icon">📝</div><p>Нет задач</p></div></div>
                 <div class="add-task-row">
                     <input type="text" id="ozonTaskInput" placeholder="Новая задача...">
                     <select id="ozonAssignSelect"></select>
                     <button id="ozonTaskAdd">+</button>
                 </div>
-                <div style="margin-top: 8px; font-size: 12px; color: #999;">
-                    🔒 Только создатель задачи может изменять или удалять её
-                </div>
+                <div style="margin-top: 8px; font-size: 12px; color: #999;">🔒 Только создатель может изменять или удалять</div>
             </div>
 
-            <!-- Потерянные товары Ozon -->
             <div class="card" style="border-left: 4px solid #ff9800;">
-                <div class="card-title">
-                    🔍 Потерянные товары Ozon
-                    <span class="count" id="ozonLostCount">0</span>
-                </div>
+                <div class="card-title">🔍 Потерянные товары Ozon <span class="count" id="ozonLostCount">0</span></div>
                 <div class="lost-items-grid" id="ozonLostItems"><div class="empty-state"><div class="icon">🔍</div><p>Нет потерянных товаров</p></div></div>
                 <div class="add-lost-row">
                     <input type="text" id="ozonLostSku" placeholder="ШК товара (цифры с буквами)">
@@ -373,27 +447,18 @@
             </div>
 
             <div class="card">
-                <div class="card-title">
-                    📋 Задачи WB
-                    <span class="count" id="wbTaskCount">0</span>
-                </div>
+                <div class="card-title">📋 Задачи WB <span class="count" id="wbTaskCount">0</span></div>
                 <div class="task-list" id="tasksWb"><div class="empty-state"><div class="icon">📝</div><p>Нет задач</p></div></div>
                 <div class="add-task-row">
                     <input type="text" id="wbTaskInput" placeholder="Новая задача...">
                     <select id="wbAssignSelect"></select>
                     <button id="wbTaskAdd">+</button>
                 </div>
-                <div style="margin-top: 8px; font-size: 12px; color: #999;">
-                    🔒 Только создатель задачи может изменять или удалять её
-                </div>
+                <div style="margin-top: 8px; font-size: 12px; color: #999;">🔒 Только создатель может изменять или удалять</div>
             </div>
 
-            <!-- Потерянные товары WB -->
             <div class="card" style="border-left: 4px solid #ff9800;">
-                <div class="card-title">
-                    🔍 Потерянные товары WB
-                    <span class="count" id="wbLostCount">0</span>
-                </div>
+                <div class="card-title">🔍 Потерянные товары WB <span class="count" id="wbLostCount">0</span></div>
                 <div class="lost-items-grid" id="wbLostItems"><div class="empty-state"><div class="icon">🔍</div><p>Нет потерянных товаров</p></div></div>
                 <div class="add-lost-row">
                     <input type="text" id="wbLostSku" placeholder="ШК товара (цифры с буквами)">
@@ -407,11 +472,47 @@
         <!-- ===== ВКЛАДКА ДОСТАВКА ===== -->
         <div class="tab-content" id="tabDelivery">
             <div class="delivery-content">
-                <div class="delivery-banner">
-                    <div class="icon">🚚</div>
-                    <h2>Доставка Ozon & WB</h2>
-                    <p>Скоро здесь появится управление заказами и трекингом</p>
-                    <div class="badge">🚧 В разработке</div>
+                <!-- Счетчики -->
+                <div class="delivery-stats">
+                    <div class="delivery-card" style="border-color: rgba(0,91,255,0.3);">
+                        <div class="icon">📦</div>
+                        <div class="label">Ozon</div>
+                        <div class="count" style="color: #005bff;" id="ozonDeliveryCount">0</div>
+                        <div class="sub">отправлений</div>
+                        <div class="meta">👤 Обновлено: <span id="ozonDeliveryUpdater">—</span></div>
+                        <div class="controls" id="ozonDeliveryControls">
+                            <input type="number" id="ozonDeliveryInput" placeholder="Кол-во" min="0">
+                            <button id="ozonDeliveryBtn" style="background: linear-gradient(135deg, #005bff, #7f3bff); color: white;">Обновить</button>
+                        </div>
+                        <div class="lock" id="ozonDeliveryLock">🔒 Только Данила может изменять</div>
+                    </div>
+
+                    <div class="delivery-card" style="border-color: rgba(155,77,255,0.3);">
+                        <div class="icon">🛒</div>
+                        <div class="label">WB</div>
+                        <div class="count" style="color: #9b4dff;" id="wbDeliveryCount">0</div>
+                        <div class="sub">отправлений</div>
+                        <div class="meta">👤 Обновлено: <span id="wbDeliveryUpdater">—</span></div>
+                        <div class="controls" id="wbDeliveryControls">
+                            <input type="number" id="wbDeliveryInput" placeholder="Кол-во" min="0">
+                            <button id="wbDeliveryBtn" style="background: linear-gradient(135deg, #9b4dff, #6b2fa0); color: white;">Обновить</button>
+                        </div>
+                        <div class="lock" id="wbDeliveryLock">🔒 Только Данила может изменять</div>
+                    </div>
+                </div>
+
+                <!-- Статус доставки -->
+                <div class="delivery-status">
+                    <div>
+                        <span class="status-label">📊 Статус доставки:</span>
+                        <span class="current-status" id="deliveryStatusDisplay">—</span>
+                    </div>
+                    <div class="status-buttons" id="deliveryStatusControls">
+                        <button data-status="Идет" id="statusGoing">🚚 Идет</button>
+                        <button data-status="Принимаем" id="statusReceiving">📥 Принимаем</button>
+                        <button data-status="Принято" id="statusReceived">✅ Принято</button>
+                    </div>
+                    <div style="font-size: 12px; color: #999;">🔒 Только Данила может менять статус</div>
                 </div>
             </div>
         </div>
@@ -545,6 +646,24 @@
     const wbLostWhere = document.getElementById('wbLostWhere');
     const wbLostDesc = document.getElementById('wbLostDesc');
     const wbLostAdd = document.getElementById('wbLostAdd');
+
+    // Доставка
+    const ozonDeliveryCount = document.getElementById('ozonDeliveryCount');
+    const wbDeliveryCount = document.getElementById('wbDeliveryCount');
+    const ozonDeliveryUpdater = document.getElementById('ozonDeliveryUpdater');
+    const wbDeliveryUpdater = document.getElementById('wbDeliveryUpdater');
+    const ozonDeliveryInput = document.getElementById('ozonDeliveryInput');
+    const wbDeliveryInput = document.getElementById('wbDeliveryInput');
+    const ozonDeliveryBtn = document.getElementById('ozonDeliveryBtn');
+    const wbDeliveryBtn = document.getElementById('wbDeliveryBtn');
+    const ozonDeliveryLock = document.getElementById('ozonDeliveryLock');
+    const wbDeliveryLock = document.getElementById('wbDeliveryLock');
+    const ozonDeliveryControls = document.getElementById('ozonDeliveryControls');
+    const wbDeliveryControls = document.getElementById('wbDeliveryControls');
+    const deliveryStatusDisplay = document.getElementById('deliveryStatusDisplay');
+    const statusGoing = document.getElementById('statusGoing');
+    const statusReceiving = document.getElementById('statusReceiving');
+    const statusReceived = document.getElementById('statusReceived');
 
     // ============================================================
     // ФУНКЦИИ РЕНДЕРИНГА
@@ -683,6 +802,116 @@
     }
 
     // ============================================================
+    // ДОСТАВКА
+    // ============================================================
+    function loadDeliveryData() {
+        // Ozon доставка
+        database.ref('delivery/ozon').on('value', (snapshot) => {
+            const data = snapshot.val() || { count: 0, updatedBy: '—' };
+            ozonDeliveryCount.textContent = data.count || 0;
+            ozonDeliveryUpdater.textContent = data.updatedBy || '—';
+            updateDeliveryUI('ozon', data.updatedBy);
+        });
+
+        // WB доставка
+        database.ref('delivery/wb').on('value', (snapshot) => {
+            const data = snapshot.val() || { count: 0, updatedBy: '—' };
+            wbDeliveryCount.textContent = data.count || 0;
+            wbDeliveryUpdater.textContent = data.updatedBy || '—';
+            updateDeliveryUI('wb', data.updatedBy);
+        });
+
+        // Статус доставки
+        database.ref('delivery/status').on('value', (snapshot) => {
+            const status = snapshot.val() || '—';
+            updateDeliveryStatusUI(status);
+        });
+    }
+
+    function updateDeliveryUI(type, updater) {
+        const isDanila = currentUser === 'Данила';
+        const input = document.getElementById(`${type}DeliveryInput`);
+        const btn = document.getElementById(`${type}DeliveryBtn`);
+        const lock = document.getElementById(`${type}DeliveryLock`);
+
+        if (input) {
+            input.disabled = !isDanila;
+            input.style.opacity = isDanila ? '1' : '0.5';
+        }
+        if (btn) {
+            btn.disabled = !isDanila;
+            btn.style.opacity = isDanila ? '1' : '0.5';
+            btn.style.cursor = isDanila ? 'pointer' : 'not-allowed';
+        }
+        if (lock) {
+            lock.textContent = isDanila ? '🔓 Вы можете изменять' : '🔒 Только Данила может изменять';
+            lock.style.color = isDanila ? '#4caf50' : '#999';
+        }
+    }
+
+    function updateDeliveryStatusUI(status) {
+        deliveryStatusDisplay.textContent = status || '—';
+        deliveryStatusDisplay.className = 'current-status';
+        
+        if (status === 'Идет') deliveryStatusDisplay.classList.add('status-going');
+        else if (status === 'Принимаем') deliveryStatusDisplay.classList.add('status-receiving');
+        else if (status === 'Принято') deliveryStatusDisplay.classList.add('status-received');
+
+        // Обновляем активную кнопку
+        [statusGoing, statusReceiving, statusReceived].forEach(btn => {
+            btn.classList.remove('active-status');
+            if (btn.dataset.status === status) btn.classList.add('active-status');
+        });
+
+        // Блокируем кнопки если не Данила
+        const isDanila = currentUser === 'Данила';
+        [statusGoing, statusReceiving, statusReceived].forEach(btn => {
+            btn.disabled = !isDanila;
+        });
+    }
+
+    function updateDeliveryCount(type) {
+        if (currentUser !== 'Данила') {
+            alert('❌ Только Данила может изменять количество отправлений!');
+            return;
+        }
+
+        const input = document.getElementById(`${type}DeliveryInput`);
+        const count = parseInt(input.value);
+        if (isNaN(count) || count < 0) {
+            alert('❌ Введите корректное число!');
+            return;
+        }
+
+        const ref = database.ref(`delivery/${type}`);
+        ref.set({
+            count: count,
+            updatedBy: currentUser,
+            timestamp: Date.now()
+        }).then(() => {
+            console.log(`✅ Количество для ${type.toUpperCase()} обновлено: ${count}`);
+            input.value = '';
+        }).catch((error) => {
+            console.error('❌ Ошибка обновления:', error);
+            alert('❌ Ошибка сохранения! Проверьте подключение.');
+        });
+    }
+
+    function updateDeliveryStatus(status) {
+        if (currentUser !== 'Данила') {
+            alert('❌ Только Данила может менять статус доставки!');
+            return;
+        }
+
+        database.ref('delivery/status').set(status).then(() => {
+            console.log(`✅ Статус обновлён: ${status}`);
+        }).catch((error) => {
+            console.error('❌ Ошибка обновления статуса:', error);
+            alert('❌ Ошибка сохранения статуса!');
+        });
+    }
+
+    // ============================================================
     // FIREBASE ФУНКЦИИ
     // ============================================================
     function loadData() {
@@ -709,6 +938,9 @@
         database.ref('lost/wb').on('value', (snapshot) => {
             renderLostItems(wbLostItems, snapshot.val() || [], 'wb', wbLostCount);
         });
+
+        // Доставка
+        loadDeliveryData();
     }
 
     // ===== ЧАТЫ =====
@@ -841,6 +1073,9 @@
         database.ref('tasks/wb').off();
         database.ref('lost/ozon').off();
         database.ref('lost/wb').off();
+        database.ref('delivery/ozon').off();
+        database.ref('delivery/wb').off();
+        database.ref('delivery/status').off();
     }
 
     // ============================================================
@@ -876,6 +1111,17 @@
         wbLostWhere.value = '';
         wbLostDesc.value = '';
     });
+
+    // Доставка - счетчики
+    ozonDeliveryBtn.addEventListener('click', () => updateDeliveryCount('ozon'));
+    wbDeliveryBtn.addEventListener('click', () => updateDeliveryCount('wb'));
+    ozonDeliveryInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') updateDeliveryCount('ozon'); });
+    wbDeliveryInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') updateDeliveryCount('wb'); });
+
+    // Доставка - статус
+    statusGoing.addEventListener('click', () => updateDeliveryStatus('Идет'));
+    statusReceiving.addEventListener('click', () => updateDeliveryStatus('Принимаем'));
+    statusReceived.addEventListener('click', () => updateDeliveryStatus('Принято'));
 
     // Вкладки
     document.getElementById('tabHeaders').addEventListener('click', (e) => {
