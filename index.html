@@ -268,7 +268,29 @@
             position: relative;
         }
         .logo-area { display: flex; align-items: center; gap: 14px; }
-        .logo-icon { background: white; width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #005bff; }
+        
+        /* ===== НОВЫЙ ЛОГОТИП С ГИФКОЙ ===== */
+        .logo-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 2px solid rgba(255,255,255,0.2);
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
         .logo-area h1 { color: white; font-size: 24px; font-weight: 700; }
         .user-panel { display: flex; align-items: center; gap: 16px; }
         .user-badge { 
@@ -311,7 +333,7 @@
         .logout-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: white; padding: 8px 22px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: 0.3s; font-size: 14px; }
         .logout-btn:hover { background: rgba(255,255,255,0.2); }
 
-        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        /* ===== ОСТАЛЬНЫЕ СТИЛИ ===== */
         .main-content {
             flex: 1;
             padding: 24px 32px 32px;
@@ -321,7 +343,6 @@
             background: rgba(255,255,255,0.06);
         }
 
-        /* ===== ВКЛАДКИ ===== */
         .tabs {
             display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08);
             padding-bottom: 4px; flex-shrink: 0; flex-wrap: wrap;
@@ -337,12 +358,10 @@
         .tab-btn.verification-tab:hover { background: rgba(255,45,107,0.25); }
         .tab-btn.verification-tab.active { background: rgba(255,45,107,0.25); color: #ff2d6b; box-shadow: 0 4px 20px rgba(255,45,107,0.15); }
 
-        /* ===== КОНТЕНТ ВКЛАДОК ===== */
         .tab-content { display: none; flex: 1; animation: fadeIn 0.3s ease; overflow: hidden; gap: 20px; }
         .tab-content.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ===== КАРТОЧКИ ===== */
         .card {
             flex: 1;
             background: rgba(255,255,255,0.78);
@@ -363,7 +382,6 @@
         .card-title small { font-size: 13px; font-weight: 400; color: #999; margin-left: auto; }
         .card-title .count { background: rgba(0,0,0,0.05); padding: 2px 12px; border-radius: 50px; font-size: 13px; font-weight: 600; color: #555; }
 
-        /* ===== ЧАТ ===== */
         .chat-messages {
             flex: 1;
             background: rgba(255,255,255,0.4);
@@ -387,7 +405,6 @@
         .msg-input-row button:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(0,91,255,0.3); }
         .msg-input-row button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* ===== ЗАДАЧИ ===== */
         .task-list { flex: 1; overflow-y: auto; margin-bottom: 14px; min-height: 150px; max-height: calc(100vh - 380px); }
         .task-item { background: rgba(255,255,255,0.6); padding: 12px 16px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ff2d6b; gap: 10px; flex-wrap: wrap; }
         .task-item .task-text { font-weight: 500; color: #1a1a2e; word-break: break-word; }
@@ -408,7 +425,6 @@
         .add-task-row button:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(255,45,107,0.3); }
         .add-task-row button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* ===== ПОТЕРЯННЫЕ ТОВАРЫ ===== */
         .lost-items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1; overflow-y: auto; margin-bottom: 14px; min-height: 150px; max-height: calc(100vh - 380px); }
         .lost-item-card { background: rgba(255,255,255,0.6); border-radius: 16px; padding: 16px; border-left: 4px solid #ff9800; display: flex; flex-direction: column; gap: 8px; backdrop-filter: blur(4px); }
         .lost-item-card .item-header { display: flex; justify-content: space-between; align-items: center; }
@@ -434,7 +450,6 @@
         .add-lost-row .lost-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(255,152,0,0.3); }
         .add-lost-row .lost-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* ===== ДОСТАВКА ===== */
         .delivery-content {
             flex: 1;
             display: flex;
@@ -510,7 +525,6 @@
         .status-receiving { color: #005bff; background: rgba(0,91,255,0.1); }
         .status-received { color: #4caf50; background: rgba(76,175,80,0.1); }
 
-        /* ===== ДОСТАВКА НА ДОМ ===== */
         .home-delivery-content {
             flex: 1;
             display: flex;
@@ -552,7 +566,6 @@
             color: #999;
         }
 
-        /* ===== ГРАФИК РАБОТ ===== */
         .schedule-content {
             flex: 1;
             display: flex;
@@ -672,7 +685,6 @@
         .schedule-cell .employee-row .ozon-label { color: #005bff; }
         .schedule-cell .employee-row .wb-label { color: #9b4dff; }
 
-        /* ===== ВЕРИФИКАЦИЯ ===== */
         .verification-content {
             flex: 1;
             display: flex;
@@ -871,7 +883,9 @@
 <div class="app-wrapper" id="appWrapper">
     <div class="header">
         <div class="logo-area">
-            <div class="logo-icon">O</div>
+            <div class="logo-icon">
+                <img src="https://media.tenor.com/Uut9DUPDPcAAAAAi/plush-pepe-rainbow.gif" alt="Ozon WorkHub Logo">
+            </div>
             <h1>Ozon · WorkHub</h1>
         </div>
         <div class="admin-code" id="adminCode">
@@ -1080,9 +1094,9 @@
 
 <script>
     // ============================================================
-    // ⚠️ ВЕРСИЯ ПРИЛОЖЕНИЯ (МЕНЯЙТЕ ПРИ КАЖДОМ ОБНОВЛЕНИИ!)
+    // ⚠️ ВЕРСИЯ ПРИЛОЖЕНИЯ (ОБНОВЛЕНА ДО 2.4.0)
     // ============================================================
-    const APP_VERSION = '2.3.0';
+    const APP_VERSION = '2.4.0';
 
     // ============================================================
     // СИСТЕМА ОБНОВЛЕНИЙ
@@ -1319,9 +1333,7 @@
             clearInterval(phraseInterval);
             setTimeout(() => {
                 loadingScreen.classList.add('hidden');
-                // Проверяем обновления
                 checkForUpdates();
-                // Проверяем сессию
                 checkSavedSession();
             }, 500);
             return;
@@ -1393,7 +1405,6 @@
     const verifiedBadge = document.getElementById('verifiedBadge');
     const adminCodeEl = document.getElementById('adminCode');
 
-    // Чаты
     const chatOzon = document.getElementById('chatOzon');
     const chatWb = document.getElementById('chatWb');
     const ozonMsgInput = document.getElementById('ozonMsgInput');
@@ -1401,7 +1412,6 @@
     const ozonSendBtn = document.getElementById('ozonSendBtn');
     const wbSendBtn = document.getElementById('wbSendBtn');
 
-    // Задачи
     const tasksOzon = document.getElementById('tasksOzon');
     const tasksWb = document.getElementById('tasksWb');
     const ozonTaskInput = document.getElementById('ozonTaskInput');
@@ -1413,7 +1423,6 @@
     const ozonTaskCount = document.getElementById('ozonTaskCount');
     const wbTaskCount = document.getElementById('wbTaskCount');
 
-    // Потерянные товары
     const ozonLostItems = document.getElementById('ozonLostItems');
     const wbLostItems = document.getElementById('wbLostItems');
     const ozonLostCount = document.getElementById('ozonLostCount');
@@ -1427,7 +1436,6 @@
     const wbLostDesc = document.getElementById('wbLostDesc');
     const wbLostAdd = document.getElementById('wbLostAdd');
 
-    // Доставка
     const ozonDeliveryCount = document.getElementById('ozonDeliveryCount');
     const wbDeliveryCount = document.getElementById('wbDeliveryCount');
     const ozonDeliveryUpdater = document.getElementById('ozonDeliveryUpdater');
@@ -1443,14 +1451,12 @@
     const statusReceiving = document.getElementById('statusReceiving');
     const statusReceived = document.getElementById('statusReceived');
 
-    // График работ
     const scheduleGrid = document.getElementById('scheduleGrid');
     const scheduleMonthYear = document.getElementById('scheduleMonthYear');
     const schedulePrevMonth = document.getElementById('schedulePrevMonth');
     const scheduleNextMonth = document.getElementById('scheduleNextMonth');
     const scheduleTodayBtn = document.getElementById('scheduleTodayBtn');
 
-    // Верификация
     const verifyName = document.getElementById('verifyName');
     const verifyPassword = document.getElementById('verifyPassword');
     const verifyAdminCode = document.getElementById('verifyAdminCode');
@@ -1459,7 +1465,6 @@
     const verifySuccess = document.getElementById('verifySuccess');
     const verificationTabBtn = document.getElementById('verificationTabBtn');
 
-    // Уведомления
     const notif = document.getElementById('verificationNotif');
     const notifClose = document.getElementById('notifClose');
 
@@ -2281,14 +2286,12 @@
         document.getElementById(targetId).classList.add('active');
     });
 
-    // Скрываем уведомление через 15 секунд
     setInterval(() => {
         if (notif.classList.contains('show')) {
             notif.classList.remove('show');
         }
     }, 15000);
 
-    // Показываем уведомление каждые 5 минут
     setInterval(() => {
         if (currentUser && !isVerified(currentUser) && !notif.classList.contains('show')) {
             notif.classList.add('show');
@@ -2300,7 +2303,6 @@
         }
     }, 300000);
 
-    // Проверка обновлений каждую минуту
     setInterval(function() {
         const savedVersion = getSavedVersion();
         if (savedVersion !== APP_VERSION && !document.getElementById('updateOverlay').classList.contains('show')) {
