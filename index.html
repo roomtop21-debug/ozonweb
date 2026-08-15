@@ -10,11 +10,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
-        /* ===== ОБНУЛЕНИЕ ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
 
-        /* ===== КРАСИВЫЙ ФОН ===== */
+        /* ===== ФОН ===== */
         html {
             background-image: url('https://img.magnific.com/premium-psd/misty-mountain-forest_538547-11187.jpg?semt=ais_hybrid&w=740&q=80') !important;
             background-size: cover !important;
@@ -842,7 +841,7 @@
     // ============================================================
     // ВЕРСИЯ
     // ============================================================
-    const APP_VERSION = '2.5.0';
+    const APP_VERSION = '2.6.0';
 
     function getSavedVersion() {
         try { return localStorage.getItem('app_version'); } catch (e) { return null; }
@@ -921,48 +920,219 @@
         });
     }
 
+    // ============================================================
+    // УВЕДОМЛЕНИЯ СО ЗВУКОМ (PUSH)
+    // ============================================================
+    function requestNotificationPermission() {
+        if ('Notification' in window) {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission().then(permission => {
+                    console.log('Разрешение на уведомления:', permission);
+                    if (permission === 'granted') {
+                        showToast('✅ Уведомления включены', 'Вы будете получать оповещения');
+                    }
+                });
+            }
+        }
+    }
+
+    function sendPushNotification(title, body, withSound = true) {
+        if (!('Notification' in window) || Notification.permission !== 'granted') {
+            console.log('Уведомления не разрешены');
+            return;
+        }
+
+        try {
+            const notification = new Notification(title, {
+                body: body,
+                icon: '🔊',
+                silent: !withSound,
+                requireInteraction: true,
+                tag: Date.now()
+            });
+
+            notification.onclick = function() {
+                window.focus();
+                notification.close();
+            };
+
+            setTimeout(() => {
+                notification.close();
+            }, 10000);
+
+            if (withSound) {
+                playNotificationSound();
+            }
+
+        } catch (e) {
+            console.log('Ошибка отправки уведомления:', e);
+        }
+    }
+
     function playNotificationSound() {
         try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
+            
             oscillator.frequency.value = 800;
             oscillator.type = 'sine';
+            
             gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            
             oscillator.start(audioCtx.currentTime);
-            oscillator.stop(audioCtx.currentTime + 0.3);
-        } catch (e) {}
-    }
-
-    function requestNotificationPermission() {
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
+            oscillator.stop(audioCtx.currentTime + 0.4);
+        } catch (e) {
+            console.log('Ошибка воспроизведения звука:', e);
         }
     }
 
-    function sendPushNotification(title, body) {
-        if ('Notification' in window && Notification.permission === 'granted') {
-            try {
-                const notification = new Notification(title, { body, icon: '📦', silent: true });
-                setTimeout(() => notification.close(), 5000);
-            } catch (e) {}
+    // ============================================================
+    // ОЗВУЧКА ТЕКСТА
+    // ============================================================
+    let isVoicePlaying = false;
+    let voiceQueue = [];
+    let speechSynth = window.speechSynthesis;
+
+    function speakText(text, callback) {
+        if (!('speechSynthesis' in window)) {
+            showToast('⚠️ Ошибка', 'Ваш браузер не поддерживает озвучку');
+            if (callback) callback();
+            return;
+        }
+
+        try {
+            speechSynth.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ru-RU';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+
+            const voices = speechSynth.getVoices();
+            const ruVoice = voices.find(v => v.lang.startsWith('ru'));
+            if (ruVoice) utterance.voice = ruVoice;
+
+            utterance.onend = function() {
+                if (callback) callback();
+            };
+            utterance.onerror = function(e) {
+                console.log('Ошибка озвучки:', e);
+                if (callback) callback();
+            };
+
+            speechSynth.speak(utterance);
+        } catch (e) {
+            console.log('Ошибка speechSynthesis:', e);
+            if (callback) callback();
         }
     }
 
-    function showToast(title, text) {
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerHTML = `<div class="toast-title">${title}</div><div class="toast-text">${text}</div>`;
-        container.appendChild(toast);
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transition = 'opacity 0.5s';
-            setTimeout(() => toast.remove(), 500);
-        }, 4000);
+    function sendVoiceMessage() {
+        if (currentUser !== 'Данила') {
+            showToast('⚠️ Доступ запрещён', 'Только Данила может отправлять голосовые сообщения!');
+            return;
+        }
+
+        const input = document.getElementById('voiceInput');
+        const text = input.value.trim();
+        if (!text) {
+            showToast('⚠️ Внимание', 'Введите текст для озвучки!');
+            return;
+        }
+
+        if (!isVerified(currentUser)) {
+            showToast('⚠️ Доступ запрещён', 'Пройдите верификацию аккаунта!');
+            return;
+        }
+
+        const voiceRef = database.ref('voiceMessages');
+        const voiceData = {
+            text: text,
+            author: currentUser,
+            timestamp: Date.now()
+        };
+
+        voiceRef.push(voiceData).then(() => {
+            showToast('🔊 Голосовое сообщение отправлено', 'Текст будет озвучен у всех пользователей');
+            input.value = '';
+            document.getElementById('voiceStatus').innerHTML = '● <span style="color:#4caf50;">Отправлено ✅</span>';
+            setTimeout(() => {
+                document.getElementById('voiceStatus').innerHTML = '● <span style="color:#4caf50;">Готов</span>';
+            }, 3000);
+        }).catch((error) => {
+            showToast('❌ Ошибка', 'Не удалось отправить голосовое сообщение');
+            console.error('Ошибка:', error);
+        });
+    }
+
+    function listenVoiceMessages() {
+        const voiceRef = database.ref('voiceMessages');
+
+        voiceRef.on('child_added', (snapshot) => {
+            const voiceData = snapshot.val();
+
+            // Не озвучиваем свои сообщения (для Данилы)
+            if (voiceData.author === currentUser) return;
+
+            // Если страница не активна — отправляем push-уведомление со звуком
+            if (document.hidden) {
+                playNotificationSound();
+                sendPushNotification('🔊 Голосовое сообщение от ' + voiceData.author, voiceData.text);
+            }
+
+            // Добавляем в очередь для озвучки
+            voiceQueue.push(voiceData);
+            processVoiceQueue();
+
+            // Удаляем через 30 секунд
+            setTimeout(() => {
+                snapshot.ref.remove();
+            }, 30000);
+        });
+    }
+
+    function processVoiceQueue() {
+        if (isVoicePlaying || voiceQueue.length === 0) return;
+
+        isVoicePlaying = true;
+        const voiceData = voiceQueue.shift();
+
+        document.getElementById('voiceStatus').innerHTML = '● <span style="color:#ff9800;">Воспроизведение...</span>';
+        showToast('🔊 Голосовое сообщение', 'От ' + voiceData.author);
+
+        speakText(voiceData.text, function() {
+            isVoicePlaying = false;
+            document.getElementById('voiceStatus').innerHTML = '● <span style="color:#4caf50;">Готов</span>';
+
+            if (voiceQueue.length > 0) {
+                setTimeout(processVoiceQueue, 300);
+            }
+        });
+    }
+
+    function initVoiceMessages() {
+        if ('speechSynthesis' in window) {
+            speechSynth.getVoices();
+            speechSynth.onvoiceschanged = function() {
+                speechSynth.getVoices();
+            };
+        }
+
+        listenVoiceMessages();
+
+        document.getElementById('voiceBtn').addEventListener('click', sendVoiceMessage);
+        document.getElementById('voiceInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') sendVoiceMessage();
+        });
     }
 
     // ============================================================
@@ -1040,155 +1210,6 @@
         if (isVerified(currentUser)) return true;
         showToast('⚠️ Доступ запрещён', 'Пройдите верификацию аккаунта!');
         return false;
-    }
-
-    // ============================================================
-    // ОЗВУЧКА (УПРОЩЁННАЯ И НАДЁЖНАЯ)
-    // ============================================================
-    let isVoicePlaying = false;
-    let voiceQueue = [];
-    let speechSynth = window.speechSynthesis;
-
-    function speakText(text, callback) {
-        if (!('speechSynthesis' in window)) {
-            showToast('⚠️ Ошибка', 'Ваш браузер не поддерживает озвучку');
-            if (callback) callback();
-            return;
-        }
-
-        try {
-            // Отменяем все текущие озвучки
-            speechSynth.cancel();
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ru-RU';
-            utterance.rate = 0.9;
-            utterance.pitch = 1;
-            utterance.volume = 1;
-
-            // Пытаемся найти русский голос
-            const voices = speechSynth.getVoices();
-            const ruVoice = voices.find(v => v.lang.startsWith('ru'));
-            if (ruVoice) utterance.voice = ruVoice;
-
-            utterance.onend = function() {
-                if (callback) callback();
-            };
-            utterance.onerror = function(e) {
-                console.log('Ошибка озвучки:', e);
-                if (callback) callback();
-            };
-
-            speechSynth.speak(utterance);
-        } catch (e) {
-            console.log('Ошибка speechSynthesis:', e);
-            if (callback) callback();
-        }
-    }
-
-    function sendVoiceMessage() {
-        if (currentUser !== 'Данила') {
-            showToast('⚠️ Доступ запрещён', 'Только Данила может отправлять голосовые сообщения!');
-            return;
-        }
-
-        const input = document.getElementById('voiceInput');
-        const text = input.value.trim();
-        if (!text) {
-            showToast('⚠️ Внимание', 'Введите текст для озвучки!');
-            return;
-        }
-
-        if (!isVerified(currentUser)) {
-            showToast('⚠️ Доступ запрещён', 'Пройдите верификацию аккаунта!');
-            return;
-        }
-
-        const voiceRef = database.ref('voiceMessages');
-        const voiceData = {
-            text: text,
-            author: currentUser,
-            timestamp: Date.now()
-        };
-
-        voiceRef.push(voiceData).then(() => {
-            showToast('🔊 Голосовое сообщение отправлено', 'Текст будет озвучен у всех пользователей');
-            input.value = '';
-            document.getElementById('voiceStatus').innerHTML = '● <span style="color:#4caf50;">Отправлено ✅</span>';
-            setTimeout(() => {
-                document.getElementById('voiceStatus').innerHTML = '● <span style="color:#4caf50;">Готов</span>';
-            }, 3000);
-        }).catch((error) => {
-            showToast('❌ Ошибка', 'Не удалось отправить голосовое сообщение');
-            console.error('Ошибка:', error);
-        });
-    }
-
-    function listenVoiceMessages() {
-        const voiceRef = database.ref('voiceMessages');
-
-        voiceRef.on('child_added', (snapshot) => {
-            const voiceData = snapshot.val();
-
-            // Не озвучиваем свои сообщения (для Данилы)
-            if (voiceData.author === currentUser) return;
-
-            // Если страница не активна — уведомление
-            if (document.hidden) {
-                playNotificationSound();
-                sendPushNotification('🔊 Голосовое сообщение от ' + voiceData.author, voiceData.text);
-            }
-
-            // Добавляем в очередь
-            voiceQueue.push(voiceData);
-            processVoiceQueue();
-
-            // Удаляем через 30 секунд
-            setTimeout(() => {
-                snapshot.ref.remove();
-            }, 30000);
-        });
-    }
-
-    function processVoiceQueue() {
-        if (isVoicePlaying || voiceQueue.length === 0) return;
-
-        isVoicePlaying = true;
-        const voiceData = voiceQueue.shift();
-
-        // Показываем статус
-        document.getElementById('voiceStatus').innerHTML = '● <span style="color:#ff9800;">Воспроизведение...</span>';
-        showToast('🔊 Голосовое сообщение', 'От ' + voiceData.author);
-
-        // Воспроизводим
-        speakText(voiceData.text, function() {
-            isVoicePlaying = false;
-            document.getElementById('voiceStatus').innerHTML = '● <span style="color:#4caf50;">Готов</span>';
-
-            // Проверяем очередь
-            if (voiceQueue.length > 0) {
-                setTimeout(processVoiceQueue, 300);
-            }
-        });
-    }
-
-    function initVoiceMessages() {
-        // Загружаем голоса
-        if ('speechSynthesis' in window) {
-            speechSynth.getVoices();
-            speechSynth.onvoiceschanged = function() {
-                speechSynth.getVoices();
-            };
-        }
-
-        // Начинаем слушать
-        listenVoiceMessages();
-
-        // Обработчики
-        document.getElementById('voiceBtn').addEventListener('click', sendVoiceMessage);
-        document.getElementById('voiceInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') sendVoiceMessage();
-        });
     }
 
     // ============================================================
@@ -1686,12 +1707,12 @@
 
         database.ref('chats/ozon').on('value', (snapshot) => {
             renderChat(chatOzon, snapshot.val() || []);
+            // Уведомление при свёрнутой вкладке
             if (document.hidden && currentUser) {
                 const messages = snapshot.val() || [];
                 if (messages.length > 0) {
                     const lastMsg = messages[messages.length - 1];
                     if (lastMsg.author !== currentUser) {
-                        playNotificationSound();
                         sendPushNotification('📩 Новое сообщение в чате Ozon', `${lastMsg.author}: ${lastMsg.text}`);
                     }
                 }
@@ -1704,7 +1725,6 @@
                 if (messages.length > 0) {
                     const lastMsg = messages[messages.length - 1];
                     if (lastMsg.author !== currentUser) {
-                        playNotificationSound();
                         sendPushNotification('📩 Новое сообщение в чате WB', `${lastMsg.author}: ${lastMsg.text}`);
                     }
                 }
@@ -1716,7 +1736,6 @@
             renderTasks(tasksOzon, snapshot.val() || [], 'ozon');
             const newCount = snapshot.val() ? snapshot.val().length : 0;
             if (document.hidden && currentUser && newCount > oldCount) {
-                playNotificationSound();
                 sendPushNotification('📋 Новая задача в Ozon', 'Появилась новая задача!');
             }
         });
@@ -1725,7 +1744,6 @@
             renderTasks(tasksWb, snapshot.val() || [], 'wb');
             const newCount = snapshot.val() ? snapshot.val().length : 0;
             if (document.hidden && currentUser && newCount > oldCount) {
-                playNotificationSound();
                 sendPushNotification('📋 Новая задача в WB', 'Появилась новая задача!');
             }
         });
@@ -1741,7 +1759,6 @@
         loadScheduleData();
         loadAdminCode();
 
-        // Инициализация озвучки
         initVoiceMessages();
     }
 
@@ -2083,6 +2100,7 @@
     startAdminCodeRotation();
     console.log(`📦 Текущая версия приложения: ${APP_VERSION}`);
     console.log('✅ Ozon WorkHub загружен!');
+    console.log('🔔 Push-уведомления со звуком включены');
     console.log('🎙️ Озвучка доступна только для Данилы');
 </script>
 </body>
