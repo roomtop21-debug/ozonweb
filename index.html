@@ -30,6 +30,101 @@
             -webkit-backdrop-filter: blur(2px);
         }
 
+        /* ===== УВЕДОМЛЕНИЕ ОБ ОБНОВЛЕНИИ ===== */
+        .update-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            animation: fadeInOverlay 0.5s ease;
+        }
+        .update-overlay.show { display: flex; }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .update-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 50px 60px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUpCard 0.5s ease;
+        }
+        @keyframes slideUpCard {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .update-card .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: pulseRotate 1.5s infinite;
+        }
+        @keyframes pulseRotate {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .update-card h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+        .update-card p {
+            color: #888;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .update-card .version-info {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+        .update-card .update-btn {
+            padding: 14px 48px;
+            background: linear-gradient(135deg, #005bff, #7f3bff);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 20px rgba(0, 91, 255, 0.25);
+        }
+        .update-card .update-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(0, 91, 255, 0.35);
+        }
+        .update-card .update-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .update-card .update-sub {
+            font-size: 12px;
+            color: #bbb;
+            margin-top: 12px;
+        }
+
         /* ===== ЭКРАН ЗАГРУЗКИ ===== */
         .loading-screen {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -72,75 +167,6 @@
         .login-users p { margin: 3px 0; }
         .login-users strong { color: #1a1a2e; }
         .login-users .hint { font-size: 12px; color: #999; margin-top: 8px; text-align: center; }
-
-        /* ===== ОСНОВНОЙ ИНТЕРФЕЙС ===== */
-        .app-wrapper {
-            display: none;
-            width: 100vw;
-            height: 100vh;
-            flex-direction: column;
-        }
-        .app-wrapper.active { display: flex; }
-
-        /* ===== ШАПКА ===== */
-        .header {
-            background: rgba(0, 20, 40, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-            flex-wrap: wrap;
-            gap: 12px;
-            min-height: 72px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            position: relative;
-        }
-        .logo-area { display: flex; align-items: center; gap: 14px; }
-        .logo-icon { background: white; width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #005bff; }
-        .logo-area h1 { color: white; font-size: 24px; font-weight: 700; }
-        .user-panel { display: flex; align-items: center; gap: 16px; }
-        .user-badge { 
-            background: rgba(255,255,255,0.12); 
-            padding: 8px 22px; 
-            border-radius: 50px; 
-            color: white; 
-            font-weight: 500; 
-            border: 1px solid rgba(255,255,255,0.12); 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            font-size: 15px; 
-            backdrop-filter: blur(4px);
-        }
-        .user-badge .verified-badge {
-            display: none;
-            font-size: 18px;
-            color: #4caf50;
-        }
-        .user-badge .verified-badge.show {
-            display: inline-block;
-        }
-        .admin-code {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255,255,255,0.1);
-            padding: 6px 16px;
-            border-radius: 20px;
-            color: rgba(255,255,255,0.7);
-            font-size: 13px;
-            font-weight: 500;
-            border: 1px solid rgba(255,255,255,0.1);
-            display: none;
-        }
-        .admin-code.show { display: block; }
-        .admin-code strong { color: #ffd700; }
-        .logout-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: white; padding: 8px 22px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: 0.3s; font-size: 14px; }
-        .logout-btn:hover { background: rgba(255,255,255,0.2); }
 
         /* ===== УВЕДОМЛЕНИЕ О ВЕРИФИКАЦИИ ===== */
         .verification-notification {
@@ -216,6 +242,75 @@
         .toast .toast-title { font-weight: 600; margin-bottom: 2px; }
         .toast .toast-text { color: rgba(255,255,255,0.7); font-size: 13px; }
 
+        /* ===== ОСНОВНОЙ ИНТЕРФЕЙС ===== */
+        .app-wrapper {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .app-wrapper.active { display: flex; }
+
+        /* ===== ШАПКА ===== */
+        .header {
+            background: rgba(0, 20, 40, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 12px;
+            min-height: 72px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+        }
+        .logo-area { display: flex; align-items: center; gap: 14px; }
+        .logo-icon { background: white; width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #005bff; }
+        .logo-area h1 { color: white; font-size: 24px; font-weight: 700; }
+        .user-panel { display: flex; align-items: center; gap: 16px; }
+        .user-badge { 
+            background: rgba(255,255,255,0.12); 
+            padding: 8px 22px; 
+            border-radius: 50px; 
+            color: white; 
+            font-weight: 500; 
+            border: 1px solid rgba(255,255,255,0.12); 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            font-size: 15px; 
+            backdrop-filter: blur(4px);
+        }
+        .user-badge .verified-badge {
+            display: none;
+            font-size: 18px;
+            color: #4caf50;
+        }
+        .user-badge .verified-badge.show {
+            display: inline-block;
+        }
+        .admin-code {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.1);
+            padding: 6px 16px;
+            border-radius: 20px;
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: none;
+        }
+        .admin-code.show { display: block; }
+        .admin-code strong { color: #ffd700; }
+        .logout-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: white; padding: 8px 22px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: 0.3s; font-size: 14px; }
+        .logout-btn:hover { background: rgba(255,255,255,0.2); }
+
         /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
         .main-content {
             flex: 1;
@@ -280,8 +375,8 @@
             max-height: calc(100vh - 380px);
         }
         .msg { background: white; padding: 10px 16px; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid #005bff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-        .msg strong { color: #005bff; display: block; font-size: 13px; margin-bottom: 3px; }
         .msg .msg-author { display: flex; align-items: center; gap: 6px; }
+        .msg .msg-author strong { color: #005bff; }
         .msg .msg-author .verified-badge-small { color: #4caf50; font-size: 14px; display: none; }
         .msg .msg-author .verified-badge-small.show { display: inline; }
         .msg .time { font-size: 11px; color: #aaa; margin-top: 4px; }
@@ -302,7 +397,7 @@
         .task-item .task-actions .delete-btn { background: #ff2d6b; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.3s; }
         .task-item .task-actions .delete-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .task-item .task-actions .delete-btn:hover:not(:disabled) { background: #cc0044; transform: scale(1.05); }
-        .task-item .task-author { font-size: 11px; color: #999; margin-left: 10px; }
+        .task-item .task-author { font-size: 11px; color: #999; margin-left: 10px; display: flex; align-items: center; gap: 4px; }
         .task-item .task-author .verified-badge-small { color: #4caf50; font-size: 12px; display: none; }
         .task-item .task-author .verified-badge-small.show { display: inline; }
         .add-task-row { display: flex; gap: 10px; flex-shrink: 0; }
@@ -323,7 +418,7 @@
         .status-lost { background: #f8d7da; color: #721c24; }
         .status-found { background: #d4edda; color: #155724; }
         .lost-item-card .item-description { font-size: 14px; color: #555; word-break: break-word; }
-        .lost-item-card .item-meta { font-size: 12px; color: #999; display: flex; justify-content: space-between; }
+        .lost-item-card .item-meta { font-size: 12px; color: #999; display: flex; justify-content: space-between; align-items: center; gap: 4px; }
         .lost-item-card .item-meta .verified-badge-small { color: #4caf50; font-size: 12px; display: none; }
         .lost-item-card .item-meta .verified-badge-small.show { display: inline; }
         .lost-item-card .item-actions { display: flex; gap: 8px; margin-top: 4px; }
@@ -638,7 +733,7 @@
         .tab-content#tabWb .card-title .count { background: #e8d5ff; color: #6b2fa0; }
         .tab-content#tabWb .chat-messages { background: rgba(243,236,255,0.4); }
         .tab-content#tabWb .msg { border-left-color: #9b4dff; }
-        .tab-content#tabWb .msg strong { color: #7b2fbe; }
+        .tab-content#tabWb .msg .msg-author strong { color: #7b2fbe; }
         .tab-content#tabWb .msg-input-row button { background: linear-gradient(135deg, #9b4dff, #6b2fa0); box-shadow: 0 4px 15px rgba(155,77,255,0.2); }
         .tab-content#tabWb .msg-input-row button:disabled { opacity: 0.4; }
         .tab-content#tabWb .task-item { background: rgba(243,236,255,0.4); border-left-color: #9b4dff; }
@@ -684,6 +779,7 @@
             .schedule-nav { justify-content: center; }
             .schedule-info { justify-content: center; }
             .admin-code { position: static; transform: none; margin-top: 8px; }
+            .update-card { padding: 30px 24px; }
         }
         @media (max-width: 500px) {
             .msg-input-row { flex-wrap: wrap; }
@@ -708,10 +804,28 @@
             .schedule-month { font-size: 16px; min-width: 100px; }
             .schedule-nav button { width: 28px; height: 28px; font-size: 14px; }
             .verification-notification { right: 10px; left: 10px; max-width: none; bottom: 10px; }
+            .update-card { padding: 24px 16px; }
+            .update-card h2 { font-size: 22px; }
+            .update-card .icon { font-size: 48px; }
         }
     </style>
 </head>
 <body>
+
+<!-- ===== УВЕДОМЛЕНИЕ ОБ ОБНОВЛЕНИИ ===== -->
+<div class="update-overlay" id="updateOverlay">
+    <div class="update-card">
+        <div class="icon">🔄</div>
+        <h2>Доступно обновление!</h2>
+        <p>Вышла новая версия приложения.<br>Обновите страницу для продолжения работы.</p>
+        <div class="version-info">
+            Текущая версия: <span id="currentVersionText">—</span><br>
+            Новая версия: <span id="newVersionText">—</span>
+        </div>
+        <button class="update-btn" id="updateBtn">🔄 Обновить сейчас</button>
+        <div class="update-sub">После обновления все данные сохранятся</div>
+    </div>
+</div>
 
 <!-- ===== ЭКРАН ЗАГРУЗКИ ===== -->
 <div class="loading-screen" id="loadingScreen">
@@ -966,6 +1080,71 @@
 
 <script>
     // ============================================================
+    // ⚠️ ВЕРСИЯ ПРИЛОЖЕНИЯ (МЕНЯЙТЕ ПРИ КАЖДОМ ОБНОВЛЕНИИ!)
+    // ============================================================
+    const APP_VERSION = '2.3.0';
+
+    // ============================================================
+    // СИСТЕМА ОБНОВЛЕНИЙ
+    // ============================================================
+    function getSavedVersion() {
+        try {
+            return localStorage.getItem('app_version');
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function saveVersion(version) {
+        try {
+            localStorage.setItem('app_version', version);
+        } catch (e) {
+            console.warn('Не удалось сохранить версию');
+        }
+    }
+
+    function checkForUpdates() {
+        const savedVersion = getSavedVersion();
+        const currentVersion = APP_VERSION;
+        
+        if (!savedVersion) {
+            saveVersion(currentVersion);
+            return;
+        }
+        
+        if (savedVersion !== currentVersion) {
+            showUpdateNotification(savedVersion, currentVersion);
+        }
+    }
+
+    function showUpdateNotification(oldVersion, newVersion) {
+        const overlay = document.getElementById('updateOverlay');
+        const currentVersionText = document.getElementById('currentVersionText');
+        const newVersionText = document.getElementById('newVersionText');
+        const updateBtn = document.getElementById('updateBtn');
+        
+        currentVersionText.textContent = oldVersion || '—';
+        newVersionText.textContent = newVersion || '—';
+        
+        overlay.classList.add('show');
+        
+        updateBtn.disabled = true;
+        updateBtn.textContent = '⏳ Подготовка...';
+        setTimeout(() => {
+            updateBtn.disabled = false;
+            updateBtn.textContent = '🔄 Обновить сейчас';
+        }, 3000);
+        
+        // Убираем старые обработчики
+        const newBtn = updateBtn.cloneNode(true);
+        updateBtn.parentNode.replaceChild(newBtn, updateBtn);
+        newBtn.addEventListener('click', function() {
+            saveVersion(newVersion);
+            location.reload();
+        });
+    }
+
+    // ============================================================
     // 🔥 FIREBASE КОНФИГУРАЦИЯ
     // ============================================================
     const firebaseConfig = {
@@ -1012,18 +1191,14 @@
     function updateAdminCode() {
         adminCode = generateAdminCode();
         document.getElementById('adminCodeText').textContent = adminCode;
-        // Сохраняем в Firebase
         database.ref('adminCode').set(adminCode);
     }
 
     function startAdminCodeRotation() {
-        // Генерируем первый код
         updateAdminCode();
-        // Обновляем каждые 15 минут (900000 мс)
         adminCodeInterval = setInterval(updateAdminCode, 900000);
     }
 
-    // Загружаем код админа из Firebase (если есть)
     function loadAdminCode() {
         database.ref('adminCode').on('value', (snapshot) => {
             const code = snapshot.val();
@@ -1144,6 +1319,9 @@
             clearInterval(phraseInterval);
             setTimeout(() => {
                 loadingScreen.classList.add('hidden');
+                // Проверяем обновления
+                checkForUpdates();
+                // Проверяем сессию
                 checkSavedSession();
             }, 500);
             return;
@@ -1336,7 +1514,7 @@
                         ${USERS.map(u => `<option value="${u}" ${u === task.assign ? 'selected' : ''}>${u}</option>`).join('')}
                     </select>
                     <button class="delete-btn" data-chat="${chatKey}" data-index="${index}" ${!isCreator ? 'disabled' : ''}>✕</button>
-                    <span class="task-author" title="Создатель: ${task.createdBy || 'неизвестен'}">
+                    <span class="task-author">
                         👤${task.createdBy || '?'}
                         <span class="verified-badge-small ${isVerifiedAuthor ? 'show' : ''}">✅</span>
                     </span>
@@ -1440,30 +1618,25 @@
     function updateUIForVerification() {
         const verified = isVerified(currentUser);
         
-        // Обновляем галочку
         if (verified) {
             verifiedBadge.classList.add('show');
         } else {
             verifiedBadge.classList.remove('show');
         }
         
-        // Показываем/скрываем вкладку верификации
         if (verified) {
             verificationTabBtn.style.display = 'none';
         } else {
             verificationTabBtn.style.display = 'inline-block';
         }
         
-        // Блокируем/разблокируем функции
         const isBlocked = !verified && currentUser;
         
-        // Чат
         ozonSendBtn.disabled = isBlocked;
         wbSendBtn.disabled = isBlocked;
         ozonMsgInput.disabled = isBlocked;
         wbMsgInput.disabled = isBlocked;
         
-        // Задачи
         ozonTaskAdd.disabled = isBlocked;
         wbTaskAdd.disabled = isBlocked;
         ozonTaskInput.disabled = isBlocked;
@@ -1471,7 +1644,6 @@
         ozonAssignSelect.disabled = isBlocked;
         wbAssignSelect.disabled = isBlocked;
         
-        // Потерянные товары
         ozonLostAdd.disabled = isBlocked;
         wbLostAdd.disabled = isBlocked;
         ozonLostSku.disabled = isBlocked;
@@ -1481,10 +1653,8 @@
         ozonLostDesc.disabled = isBlocked;
         wbLostDesc.disabled = isBlocked;
         
-        // Показываем уведомление
         checkVerificationNotification();
         
-        // Показываем код админа только для Данилы
         if (currentUser === 'Данила') {
             adminCodeEl.classList.add('show');
         } else {
@@ -1720,7 +1890,6 @@
     // FIREBASE ФУНКЦИИ
     // ============================================================
     function loadData() {
-        // Загружаем верифицированных пользователей
         database.ref('verifiedUsers').on('value', (snapshot) => {
             verifiedUsers = snapshot.val() || {};
             if (currentUser) {
@@ -1728,10 +1897,8 @@
             }
         });
 
-        // Чаты
         database.ref('chats/ozon').on('value', (snapshot) => {
             renderChat(chatOzon, snapshot.val() || []);
-            // Уведомление о новом сообщении
             if (document.hidden && currentUser) {
                 const messages = snapshot.val() || [];
                 if (messages.length > 0) {
@@ -1757,7 +1924,6 @@
             }
         });
 
-        // Задачи
         database.ref('tasks/ozon').on('value', (snapshot) => {
             const oldCount = document.querySelector('#tasksOzon .task-item') ? 
                 document.querySelectorAll('#tasksOzon .task-item').length : 0;
@@ -1779,7 +1945,6 @@
             }
         });
 
-        // Потерянные товары
         database.ref('lost/ozon').on('value', (snapshot) => {
             renderLostItems(ozonLostItems, snapshot.val() || [], 'ozon', ozonLostCount);
         });
@@ -1787,13 +1952,8 @@
             renderLostItems(wbLostItems, snapshot.val() || [], 'wb', wbLostCount);
         });
 
-        // Доставка
         loadDeliveryData();
-
-        // График работ
         loadScheduleData();
-
-        // Код админа
         loadAdminCode();
     }
 
@@ -1930,7 +2090,6 @@
             return;
         }
 
-        // Верификация успешна!
         verifiedUsers[name] = true;
         database.ref('verifiedUsers').set(verifiedUsers).then(() => {
             verifySuccess.textContent = '✅ Верификация пройдена!';
@@ -1956,7 +2115,6 @@
             currentUserName.textContent = currentUser;
             updateSelects();
             loadData();
-            // Проверяем верификацию через секунду
             setTimeout(() => {
                 updateUIForVerification();
                 if (!isVerified(currentUser)) {
@@ -1964,7 +2122,6 @@
                 }
             }, 1000);
             console.log(`✅ Автоматический вход для ${currentUser}`);
-            // Запрашиваем разрешение на уведомления
             requestNotificationPermission();
         } else {
             loginOverlay.classList.add('active');
@@ -2049,19 +2206,16 @@
     loginUsername.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
     logoutBtn.addEventListener('click', logout);
 
-    // Чаты
     ozonSendBtn.addEventListener('click', () => sendMessage('ozon', ozonMsgInput));
     wbSendBtn.addEventListener('click', () => sendMessage('wb', wbMsgInput));
     ozonMsgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage('ozon', ozonMsgInput); });
     wbMsgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage('wb', wbMsgInput); });
 
-    // Задачи
     ozonTaskAdd.addEventListener('click', () => addTask('ozon', ozonTaskInput, ozonAssignSelect));
     wbTaskAdd.addEventListener('click', () => addTask('wb', wbTaskInput, wbAssignSelect));
     ozonTaskInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') ozonTaskAdd.click(); });
     wbTaskInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') wbTaskAdd.click(); });
 
-    // Потерянные товары
     ozonLostAdd.addEventListener('click', () => {
         addLostItem('ozon', ozonLostSku.value, ozonLostWhere.value, ozonLostDesc.value);
     });
@@ -2069,18 +2223,15 @@
         addLostItem('wb', wbLostSku.value, wbLostWhere.value, wbLostDesc.value);
     });
 
-    // Доставка
     ozonDeliveryBtn.addEventListener('click', () => updateDeliveryCount('ozon'));
     wbDeliveryBtn.addEventListener('click', () => updateDeliveryCount('wb'));
     ozonDeliveryInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') updateDeliveryCount('ozon'); });
     wbDeliveryInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') updateDeliveryCount('wb'); });
 
-    // Доставка - статус
     statusGoing.addEventListener('click', () => updateDeliveryStatus('Идет'));
     statusReceiving.addEventListener('click', () => updateDeliveryStatus('Принимаем'));
     statusReceived.addEventListener('click', () => updateDeliveryStatus('Принято'));
 
-    // График работ
     schedulePrevMonth.addEventListener('click', () => {
         currentMonth--;
         if (currentMonth < 0) { currentMonth = 11; currentYear--; }
@@ -2100,14 +2251,11 @@
         renderSchedule(currentMonth, currentYear);
     });
 
-    // Верификация
     verifyBtn.addEventListener('click', verifyUser);
     verifyAdminCode.addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyUser(); });
 
-    // Уведомление о верификации
     notif.addEventListener('click', (e) => {
         if (e.target.closest('.notif-close')) return;
-        // Переключаем на вкладку верификации
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         verificationTabBtn.classList.add('active');
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -2120,7 +2268,6 @@
         notif.classList.remove('show');
     });
 
-    // Вкладки
     document.getElementById('tabHeaders').addEventListener('click', (e) => {
         const btn = e.target.closest('.tab-btn');
         if (!btn) return;
@@ -2141,18 +2288,28 @@
         }
     }, 15000);
 
-    // Показываем уведомление каждые 5 минут (если не верифицирован)
+    // Показываем уведомление каждые 5 минут
     setInterval(() => {
         if (currentUser && !isVerified(currentUser) && !notif.classList.contains('show')) {
             notif.classList.add('show');
-            // Автоматически скрываем через 15 секунд
             setTimeout(() => {
                 if (notif.classList.contains('show')) {
                     notif.classList.remove('show');
                 }
             }, 15000);
         }
-    }, 300000); // 5 минут
+    }, 300000);
+
+    // Проверка обновлений каждую минуту
+    setInterval(function() {
+        const savedVersion = getSavedVersion();
+        if (savedVersion !== APP_VERSION && !document.getElementById('updateOverlay').classList.contains('show')) {
+            const overlay = document.getElementById('updateOverlay');
+            if (!overlay.classList.contains('show')) {
+                showUpdateNotification(savedVersion, APP_VERSION);
+            }
+        }
+    }, 60000);
 
     // ============================================================
     // СТАРТ
@@ -2161,6 +2318,7 @@
     setTimeout(simulateLoading, 500);
     updateSelects();
     startAdminCodeRotation();
+    console.log(`📦 Текущая версия приложения: ${APP_VERSION}`);
     console.log('✅ Ozon WorkHub загружен!');
     console.log('🔐 Сессия сохраняется автоматически');
     console.log('✅ Верификация аккаунта доступна');
