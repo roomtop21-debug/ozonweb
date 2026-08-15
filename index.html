@@ -269,7 +269,7 @@
         }
         .logo-area { display: flex; align-items: center; gap: 14px; }
         
-        /* ===== НОВЫЙ ЛОГОТИП С ГИФКОЙ ===== */
+        /* ===== ЛОГОТИП С ГИФКОЙ ===== */
         .logo-icon {
             width: 46px;
             height: 46px;
@@ -1094,12 +1094,12 @@
 
 <script>
     // ============================================================
-    // ⚠️ ВЕРСИЯ ПРИЛОЖЕНИЯ (ОБНОВЛЕНА ДО 2.4.0)
+    // ⚠️ ВЕРСИЯ ПРИЛОЖЕНИЯ
     // ============================================================
     const APP_VERSION = '2.4.0';
 
     // ============================================================
-    // СИСТЕМА ОБНОВЛЕНИЙ
+    // СИСТЕМА ОБНОВЛЕНИЙ (АВТОМАТИЧЕСКАЯ)
     // ============================================================
     function getSavedVersion() {
         try {
@@ -1121,11 +1121,13 @@
         const savedVersion = getSavedVersion();
         const currentVersion = APP_VERSION;
         
+        // Если версия не сохранена — сохраняем текущую
         if (!savedVersion) {
             saveVersion(currentVersion);
             return;
         }
         
+        // Если версии не совпадают — показываем уведомление
         if (savedVersion !== currentVersion) {
             showUpdateNotification(savedVersion, currentVersion);
         }
@@ -1144,18 +1146,18 @@
         
         updateBtn.disabled = true;
         updateBtn.textContent = '⏳ Подготовка...';
+        
+        // Ждём 3 секунды, потом активируем кнопку
         setTimeout(() => {
             updateBtn.disabled = false;
             updateBtn.textContent = '🔄 Обновить сейчас';
         }, 3000);
         
-        // Убираем старые обработчики
-        const newBtn = updateBtn.cloneNode(true);
-        updateBtn.parentNode.replaceChild(newBtn, updateBtn);
-        newBtn.addEventListener('click', function() {
+        // Обработчик кнопки
+        updateBtn.onclick = function() {
             saveVersion(newVersion);
             location.reload();
-        });
+        };
     }
 
     // ============================================================
@@ -1333,7 +1335,9 @@
             clearInterval(phraseInterval);
             setTimeout(() => {
                 loadingScreen.classList.add('hidden');
+                // Проверяем обновления
                 checkForUpdates();
+                // Проверяем сессию
                 checkSavedSession();
             }, 500);
             return;
@@ -2302,16 +2306,6 @@
             }, 15000);
         }
     }, 300000);
-
-    setInterval(function() {
-        const savedVersion = getSavedVersion();
-        if (savedVersion !== APP_VERSION && !document.getElementById('updateOverlay').classList.contains('show')) {
-            const overlay = document.getElementById('updateOverlay');
-            if (!overlay.classList.contains('show')) {
-                showUpdateNotification(savedVersion, APP_VERSION);
-            }
-        }
-    }, 60000);
 
     // ============================================================
     // СТАРТ
