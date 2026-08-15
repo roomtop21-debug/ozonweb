@@ -647,7 +647,6 @@
         <!-- ===== ВКЛАДКА ГРАФИК РАБОТ ===== -->
         <div class="tab-content" id="tabSchedule">
             <div class="schedule-content">
-                <!-- Заголовок -->
                 <div class="schedule-header">
                     <div class="schedule-nav">
                         <button id="schedulePrevMonth">◀</button>
@@ -655,12 +654,11 @@
                         <button id="scheduleNextMonth">▶</button>
                     </div>
                     <div class="schedule-info">
-                        <span>🔒 Только <strong>Данила</strong> может редактировать</span>
+                        <span>✏️ Все сотрудники могут редактировать</span>
                         <button class="schedule-today-btn" id="scheduleTodayBtn">📅 Сегодня</button>
                     </div>
                 </div>
 
-                <!-- Дни недели -->
                 <div class="schedule-weekdays">
                     <div class="schedule-weekday">ПН</div>
                     <div class="schedule-weekday">ВТ</div>
@@ -671,7 +669,6 @@
                     <div class="schedule-weekday">ВС</div>
                 </div>
 
-                <!-- Сетка календаря -->
                 <div class="schedule-grid" id="scheduleGrid"></div>
             </div>
         </div>
@@ -1071,7 +1068,7 @@
     }
 
     // ============================================================
-    // ГРАФИК РАБОТ (Календарь)
+    // ГРАФИК РАБОТ (Календарь) — ВСЕ МОГУТ РЕДАКТИРОВАТЬ
     // ============================================================
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
@@ -1112,7 +1109,8 @@
         }
 
         const today = new Date();
-        const isDanila = currentUser === 'Данила';
+        // ВСЕ ПОЛЬЗОВАТЕЛИ МОГУТ РЕДАКТИРОВАТЬ!
+        const canEdit = true; 
 
         for (let day = 1; day <= daysInMonth; day++) {
             const cell = document.createElement('div');
@@ -1151,9 +1149,8 @@
             ozonInput.type = 'text';
             ozonInput.placeholder = 'Ozon';
             ozonInput.value = dayData.ozon || '';
-            ozonInput.disabled = !isDanila;
+            ozonInput.disabled = !canEdit;
             ozonInput.addEventListener('change', function() {
-                if (!isDanila) return;
                 const key = getDayKey(day, month, year);
                 if (!scheduleData[key]) scheduleData[key] = { ozon: '', wb: '' };
                 scheduleData[key].ozon = this.value;
@@ -1175,9 +1172,8 @@
             wbInput.type = 'text';
             wbInput.placeholder = 'WB';
             wbInput.value = dayData.wb || '';
-            wbInput.disabled = !isDanila;
+            wbInput.disabled = !canEdit;
             wbInput.addEventListener('change', function() {
-                if (!isDanila) return;
                 const key = getDayKey(day, month, year);
                 if (!scheduleData[key]) scheduleData[key] = { ozon: '', wb: '' };
                 scheduleData[key].wb = this.value;
@@ -1444,6 +1440,7 @@
     setTimeout(simulateLoading, 500);
     updateSelects();
     console.log('✅ Ozon WorkHub загружен!');
+    console.log('✏️ График работ могут редактировать все сотрудники!');
 </script>
 </body>
 </html>
