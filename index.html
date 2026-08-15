@@ -333,6 +333,92 @@
         .logout-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: white; padding: 8px 22px; border-radius: 50px; font-weight: 500; cursor: pointer; transition: 0.3s; font-size: 14px; }
         .logout-btn:hover { background: rgba(255,255,255,0.2); }
 
+        /* ===== ПАНЕЛЬ ОЗВУЧКИ (ТОЛЬКО ДЛЯ ДАНИЛЫ) ===== */
+        .voice-panel {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 10px 32px;
+            display: none;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+        }
+        .voice-panel.show { display: flex; }
+        .voice-panel .voice-label {
+            color: rgba(255,255,255,0.6);
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .voice-panel .voice-label .mic-icon {
+            font-size: 18px;
+        }
+        .voice-panel input {
+            flex: 1;
+            padding: 8px 16px;
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            font-size: 14px;
+            background: rgba(255,255,255,0.06);
+            color: white;
+            outline: none;
+            transition: 0.3s;
+            min-width: 200px;
+        }
+        .voice-panel input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+        .voice-panel input:focus {
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+        }
+        .voice-panel .voice-btn {
+            padding: 8px 24px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .voice-panel .voice-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(238, 90, 36, 0.3);
+        }
+        .voice-panel .voice-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .voice-panel .voice-btn.active {
+            animation: pulse-voice 1s infinite;
+        }
+        @keyframes pulse-voice {
+            0% { box-shadow: 0 0 0 0 rgba(238, 90, 36, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(238, 90, 36, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(238, 90, 36, 0); }
+        }
+        .voice-panel .voice-status {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            white-space: nowrap;
+        }
+        .voice-panel .voice-status .online {
+            color: #4caf50;
+        }
+
         /* ===== ОСТАЛЬНЫЕ СТИЛИ ===== */
         .main-content {
             flex: 1;
@@ -792,6 +878,8 @@
             .schedule-info { justify-content: center; }
             .admin-code { position: static; transform: none; margin-top: 8px; }
             .update-card { padding: 30px 24px; }
+            .voice-panel { padding: 8px 16px; flex-wrap: wrap; }
+            .voice-panel input { min-width: 120px; }
         }
         @media (max-width: 500px) {
             .msg-input-row { flex-wrap: wrap; }
@@ -819,6 +907,10 @@
             .update-card { padding: 24px 16px; }
             .update-card h2 { font-size: 22px; }
             .update-card .icon { font-size: 48px; }
+            .voice-panel { flex-direction: column; align-items: stretch; gap: 8px; }
+            .voice-panel .voice-label { font-size: 12px; }
+            .voice-panel input { font-size: 13px; }
+            .voice-panel .voice-btn { justify-content: center; }
         }
     </style>
 </head>
@@ -898,6 +990,17 @@
             </div>
             <button class="logout-btn" id="logoutBtn">Выйти</button>
         </div>
+    </div>
+
+    <!-- ===== ПАНЕЛЬ ОЗВУЧКИ (ТОЛЬКО ДЛЯ ДАНИЛЫ) ===== -->
+    <div class="voice-panel" id="voicePanel">
+        <div class="voice-label">
+            <span class="mic-icon">🎙️</span>
+            <span>Озвучка для всех</span>
+        </div>
+        <input type="text" id="voiceInput" placeholder="Введите текст для озвучки...">
+        <button class="voice-btn" id="voiceBtn">🔊 Озвучить</button>
+        <span class="voice-status" id="voiceStatus">● <span class="online">Готов</span></span>
     </div>
 
     <div class="main-content">
@@ -1096,7 +1199,7 @@
     // ============================================================
     // ⚠️ ВЕРСИЯ ПРИЛОЖЕНИЯ
     // ============================================================
-    const APP_VERSION = '2.4.0';
+    const APP_VERSION = '2.5.0';
 
     // ============================================================
     // СИСТЕМА ОБНОВЛЕНИЙ (АВТОМАТИЧЕСКАЯ)
@@ -1121,13 +1224,11 @@
         const savedVersion = getSavedVersion();
         const currentVersion = APP_VERSION;
         
-        // Если версия не сохранена — сохраняем текущую
         if (!savedVersion) {
             saveVersion(currentVersion);
             return;
         }
         
-        // Если версии не совпадают — показываем уведомление
         if (savedVersion !== currentVersion) {
             showUpdateNotification(savedVersion, currentVersion);
         }
@@ -1147,13 +1248,11 @@
         updateBtn.disabled = true;
         updateBtn.textContent = '⏳ Подготовка...';
         
-        // Ждём 3 секунды, потом активируем кнопку
         setTimeout(() => {
             updateBtn.disabled = false;
             updateBtn.textContent = '🔄 Обновить сейчас';
         }, 3000);
         
-        // Обработчик кнопки
         updateBtn.onclick = function() {
             saveVersion(newVersion);
             location.reload();
@@ -1335,9 +1434,7 @@
             clearInterval(phraseInterval);
             setTimeout(() => {
                 loadingScreen.classList.add('hidden');
-                // Проверяем обновления
                 checkForUpdates();
-                // Проверяем сессию
                 checkSavedSession();
             }, 500);
             return;
@@ -1396,6 +1493,137 @@
     }
 
     // ============================================================
+    // ГОЛОСОВАЯ ОЗВУЧКА (ТОЛЬКО ДАНИЛА)
+    // ============================================================
+    let isVoicePlaying = false;
+    let voiceQueue = [];
+
+    function speakText(text, callback) {
+        if (!('speechSynthesis' in window)) {
+            showToast('⚠️ Ошибка', 'Ваш браузер не поддерживает озвучку');
+            if (callback) callback();
+            return;
+        }
+
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ru-RU';
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+        
+        const voices = window.speechSynthesis.getVoices();
+        const ruVoice = voices.find(v => v.lang.startsWith('ru'));
+        if (ruVoice) utterance.voice = ruVoice;
+
+        utterance.onend = function() {
+            if (callback) callback();
+        };
+
+        utterance.onerror = function() {
+            if (callback) callback();
+        };
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function sendVoiceMessage() {
+        if (currentUser !== 'Данила') {
+            showToast('⚠️ Доступ запрещён', 'Только Данила может отправлять голосовые сообщения!');
+            return;
+        }
+
+        const input = document.getElementById('voiceInput');
+        const text = input.value.trim();
+        if (!text) {
+            showToast('⚠️ Внимание', 'Введите текст для озвучки!');
+            return;
+        }
+
+        if (!isVerified(currentUser)) {
+            showToast('⚠️ Доступ запрещён', 'Пройдите верификацию аккаунта!');
+            return;
+        }
+
+        const voiceRef = database.ref('voiceMessages');
+        const voiceData = {
+            text: text,
+            author: currentUser,
+            timestamp: Date.now()
+        };
+
+        voiceRef.push(voiceData).then(() => {
+            showToast('🔊 Голосовое сообщение отправлено', 'Текст будет озвучен у всех пользователей');
+            input.value = '';
+            document.getElementById('voiceStatus').innerHTML = '● <span style="color:#4caf50;">Отправлено ✅</span>';
+            setTimeout(() => {
+                document.getElementById('voiceStatus').innerHTML = '● <span style="color:#4caf50;">Готов</span>';
+            }, 3000);
+        }).catch((error) => {
+            showToast('❌ Ошибка', 'Не удалось отправить голосовое сообщение');
+            console.error('Ошибка отправки голосового сообщения:', error);
+        });
+    }
+
+    function listenVoiceMessages() {
+        const voiceRef = database.ref('voiceMessages');
+        
+        voiceRef.on('child_added', (snapshot) => {
+            const voiceData = snapshot.val();
+            
+            if (voiceData.author === currentUser) return;
+            
+            if (document.hidden) {
+                playNotificationSound();
+                sendPushNotification('🔊 Голосовое сообщение от ' + voiceData.author, voiceData.text);
+            }
+            
+            voiceQueue.push(voiceData);
+            processVoiceQueue();
+            
+            setTimeout(() => {
+                snapshot.ref.remove();
+            }, 30000);
+        });
+    }
+
+    function processVoiceQueue() {
+        if (isVoicePlaying || voiceQueue.length === 0) return;
+        
+        isVoicePlaying = true;
+        const voiceData = voiceQueue.shift();
+        
+        showToast('🔊 Голосовое сообщение', 'От ' + voiceData.author);
+        document.getElementById('voiceStatus').innerHTML = '● <span style="color:#ff9800;">Воспроизведение...</span>';
+        
+        speakText(voiceData.text, function() {
+            isVoicePlaying = false;
+            document.getElementById('voiceStatus').innerHTML = '● <span style="color:#4caf50;">Готов</span>';
+            if (voiceQueue.length > 0) {
+                setTimeout(processVoiceQueue, 500);
+            }
+        });
+    }
+
+    function initVoiceMessages() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.getVoices();
+            window.speechSynthesis.onvoiceschanged = function() {
+                window.speechSynthesis.getVoices();
+            };
+        }
+        
+        listenVoiceMessages();
+
+        // Обработчик для кнопки озвучки
+        document.getElementById('voiceBtn').addEventListener('click', sendVoiceMessage);
+        document.getElementById('voiceInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') sendVoiceMessage();
+        });
+    }
+
+    // ============================================================
     // DOM ЭЛЕМЕНТЫ
     // ============================================================
     const loginOverlay = document.getElementById('loginOverlay');
@@ -1408,6 +1636,9 @@
     const currentUserName = document.getElementById('currentUserName');
     const verifiedBadge = document.getElementById('verifiedBadge');
     const adminCodeEl = document.getElementById('adminCode');
+    const voicePanel = document.getElementById('voicePanel');
+    const voiceBtn = document.getElementById('voiceBtn');
+    const voiceInput = document.getElementById('voiceInput');
 
     const chatOzon = document.getElementById('chatOzon');
     const chatWb = document.getElementById('chatWb');
@@ -1666,8 +1897,14 @@
         
         if (currentUser === 'Данила') {
             adminCodeEl.classList.add('show');
+            voicePanel.classList.add('show');
+            voiceBtn.disabled = false;
+            voiceInput.disabled = false;
         } else {
             adminCodeEl.classList.remove('show');
+            voicePanel.classList.remove('show');
+            voiceBtn.disabled = true;
+            voiceInput.disabled = true;
         }
     }
 
@@ -1964,6 +2201,9 @@
         loadDeliveryData();
         loadScheduleData();
         loadAdminCode();
+        
+        // Инициализация голосовых сообщений
+        initVoiceMessages();
     }
 
     // ===== ЧАТЫ =====
@@ -2200,6 +2440,7 @@
         database.ref('schedule').off();
         database.ref('verifiedUsers').off();
         database.ref('adminCode').off();
+        database.ref('voiceMessages').off();
         
         if (adminCodeInterval) {
             clearInterval(adminCodeInterval);
@@ -2318,6 +2559,7 @@
     console.log('✅ Ozon WorkHub загружен!');
     console.log('🔐 Сессия сохраняется автоматически');
     console.log('✅ Верификация аккаунта доступна');
+    console.log('🎙️ Озвучка доступна только для Данилы');
 </script>
 </body>
 </html>
