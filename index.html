@@ -8,6 +8,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
@@ -300,24 +303,228 @@
         .status-receiving { color: #005bff; background: rgba(0,91,255,0.1); }
         .status-received { color: #4caf50; background: rgba(76,175,80,0.1); }
 
-        .home-delivery-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .home-delivery-card {
-            background: rgba(255,255,255,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border-radius: 32px; padding: 60px 80px; text-align: center; max-width: 700px; width: 100%;
-            border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+        /* ================================================================
+           НОВЫЙ РАЗДЕЛ: ДОСТАВКА НА ДОМ — ЗАЯВКИ ОТ КЛИЕНТОВ
+           ================================================================ */
+        .home-delivery-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 0;
+            overflow: hidden;
+        }
+        .home-delivery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .home-delivery-header h2 {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .home-delivery-header .badge {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            background: rgba(255,255,255,0.08);
+            padding: 6px 16px;
+            border-radius: 50px;
+        }
+        .home-delivery-orders-wrapper {
+            flex: 1;
+            display: flex;
+            gap: 16px;
+            overflow: hidden;
+            min-height: 0;
+        }
+        .home-delivery-order-list {
+            width: 280px;
+            flex-shrink: 0;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 12px 10px;
+            backdrop-filter: blur(4px);
+        }
+        .home-delivery-order-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .home-delivery-order-list::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+        .home-delivery-order-list .list-title {
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 8px 10px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 8px;
+        }
+        .order-list-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: 0.25s ease;
+            border-left: 3px solid transparent;
+            color: rgba(255,255,255,0.7);
+        }
+        .order-list-item:hover {
+            background: rgba(255,255,255,0.18);
+            transform: translateX(4px);
+        }
+        .order-list-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left-color: #005bff;
+            color: white;
+        }
+        .order-list-item .order-id {
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+        }
+        .order-list-item .order-status-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .order-list-item .order-meta {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 4px;
+        }
+        .status-badge-new { background: rgba(0,91,255,0.25); color: #64b5f6; }
+        .status-badge-transit { background: rgba(255,152,0,0.25); color: #ffb74d; }
+        .status-badge-delivered { background: rgba(76,175,80,0.25); color: #81c784; }
+        .status-badge-cancelled { background: rgba(229,57,53,0.25); color: #ef9a9a; }
+
+        .home-delivery-order-detail {
+            flex: 1;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 24px 28px;
+            overflow-y: auto;
+            min-width: 0;
+        }
+        .home-delivery-order-detail .empty-detail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            font-size: 16px;
+        }
+        .home-delivery-order-detail .empty-detail .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .detail-row .label {
+            font-weight: 600;
+            color: #888;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .detail-row .value {
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 15px;
+            text-align: right;
+            max-width: 60%;
+            word-break: break-word;
+        }
+        .detail-row .value.phone { color: #005bff; }
+        .detail-row .value.price { color: #ff2d6b; font-size: 18px; }
+        .detail-map {
+            margin-top: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            height: 220px;
+            background: #e8edf5;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+        .detail-map #orderDetailMap {
+            width: 100%;
+            height: 100%;
+        }
+        .detail-status-control {
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-top: 14px;
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        .detail-status-control .label {
+            font-weight: 600;
+            color: #888;
+            font-size: 13px;
+        }
+        .detail-status-control select {
+            padding: 8px 14px;
+            border: 2px solid rgba(0,0,0,0.08);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            background: white;
+            cursor: pointer;
+            min-width: 140px;
+        }
+        .detail-status-control select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .detail-status-control button {
+            padding: 8px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
             transition: 0.3s;
+            background: #005bff;
+            color: white;
         }
-        .home-delivery-card:hover { transform: translateY(-4px); box-shadow: 0 12px 50px rgba(0,0,0,0.12); }
-        .home-delivery-card .icon { font-size: 80px; margin-bottom: 20px; }
-        .home-delivery-card h2 { font-size: 34px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px; }
-        .home-delivery-card p { font-size: 18px; color: #888; line-height: 1.6; max-width: 500px; margin: 0 auto; }
-        .home-delivery-card .badge {
-            display: inline-block; margin-top: 24px; padding: 10px 32px;
-            background: linear-gradient(135deg, #005bff, #7f3bff); color: white;
-            border-radius: 50px; font-weight: 600; font-size: 16px;
-            box-shadow: 0 4px 20px rgba(0,91,255,0.2);
+        .detail-status-control button:hover:not(:disabled) {
+            background: #0042c2;
+            transform: scale(1.02);
         }
-        .home-delivery-card .sub-badge { margin-top: 16px; font-size: 14px; color: #999; }
+        .detail-status-control button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .detail-status-control .current-status-label {
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .status-label-new { background: #e3f2fd; color: #005bff; }
+        .status-label-transit { background: #fff3e0; color: #ff9800; }
+        .status-label-delivered { background: #e8f5e9; color: #4caf50; }
+        .status-label-cancelled { background: #fce4ec; color: #e53935; }
+
+        /* ================================================================ */
 
         .schedule-content { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow: hidden; padding: 4px 0; }
         .schedule-header {
@@ -434,8 +641,9 @@
             .add-lost-row { grid-template-columns: 1fr; }
             .delivery-status { flex-direction: column; align-items: center; text-align: center; }
             .delivery-card .count { font-size: 40px; }
-            .home-delivery-card { padding: 40px 30px; }
-            .home-delivery-card h2 { font-size: 28px; }
+            .home-delivery-orders-wrapper { flex-direction: column; }
+            .home-delivery-order-list { width: 100%; max-height: 200px; flex-shrink: 0; }
+            .home-delivery-order-detail { min-height: 300px; }
             .verification-card { padding: 30px 24px; }
             .schedule-grid { grid-template-columns: repeat(7, 1fr); }
             .schedule-cell { min-height: 50px; padding: 4px; }
@@ -459,9 +667,11 @@
             .task-item .task-actions { justify-content: flex-end; }
             .delivery-card .controls { flex-direction: column; }
             .delivery-card .controls input { width: 100%; }
-            .home-delivery-card { padding: 30px 20px; }
-            .home-delivery-card h2 { font-size: 24px; }
-            .home-delivery-card .icon { font-size: 56px; }
+            .home-delivery-order-list { max-height: 150px; }
+            .home-delivery-order-detail { padding: 16px; }
+            .detail-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .detail-row .value { text-align: left; max-width: 100%; }
+            .detail-map { height: 160px; }
             .verification-card { padding: 24px 16px; }
             .verification-card h2 { font-size: 24px; }
             .schedule-grid { grid-template-columns: repeat(7, 1fr); gap: 2px; }
@@ -683,18 +893,34 @@
                 </div>
             </div>
 
-            <!-- ДОСТАВКА НА ДОМ -->
+            <!-- ================================================================
+                 ДОСТАВКА НА ДОМ — ЗАЯВКИ ОТ КЛИЕНТОВ (НОВАЯ ВЕРСИЯ)
+                 ================================================================ -->
             <div class="tab-content" id="tabHomeDelivery">
                 <div class="home-delivery-content">
-                    <div class="home-delivery-card">
-                        <div class="icon">🏠</div>
-                        <h2>Доставка на дом</h2>
-                        <p>Доставка на дом пока что в разработке<br><span style="font-weight:500;color:#1a1a2e;">Скоро можно возить товары прямо домой!</span></p>
-                        <div class="badge">🚧 В разработке</div>
-                        <div class="sub-badge">Ожидайте запуска в ближайшее время</div>
+                    <div class="home-delivery-header">
+                        <h2>🏠 Доставка на дом</h2>
+                        <span class="badge" id="homeDeliveryCount">Заявок: 0</span>
+                    </div>
+                    <div class="home-delivery-orders-wrapper">
+                        <!-- Список заказов (вкладки) -->
+                        <div class="home-delivery-order-list" id="orderList">
+                            <div class="list-title">📋 Заказы</div>
+                            <div id="orderListItems">
+                                <div style="color:rgba(255,255,255,0.3);text-align:center;padding:20px 0;font-size:14px;">Загрузка...</div>
+                            </div>
+                        </div>
+                        <!-- Детали заказа -->
+                        <div class="home-delivery-order-detail" id="orderDetail">
+                            <div class="empty-detail">
+                                <span class="icon">👆</span>
+                                <span>Выберите заказ из списка слева</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            <!-- ================================================================ -->
 
             <!-- ГРАФИК -->
             <div class="tab-content" id="tabSchedule">
@@ -769,13 +995,12 @@
         }, 4000);
     }
 
-    // 2. ПРОВЕРКА, ЧТО showToast ДОСТУПНА
     console.log('✅ showToast загружена:', typeof showToast);
 
     // ============================================================
     // ВЕРСИЯ
     // ============================================================
-    const APP_VERSION = '2.8.0';
+    const APP_VERSION = '3.0.0';
 
     function getSavedVersion() {
         try { return localStorage.getItem('app_version'); } catch (e) { return null; }
@@ -831,6 +1056,11 @@
     let verifiedUsers = {};
     let adminCode = generateAdminCode();
     let adminCodeInterval = null;
+
+    // Хранилище заказов и выбранный ID
+    let allOrders = {};
+    let selectedOrderId = null;
+    let mapInstance = null;
 
     function generateAdminCode() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -913,7 +1143,7 @@
     }
 
     // ============================================================
-    // ОЗВУЧКА ТЕКСТА (ГАРАНТИРОВАННО РАБОТАЕТ)
+    // ОЗВУЧКА ТЕКСТА
     // ============================================================
     function speakTextSimple(text) {
         console.log('🔊 Пытаемся озвучить:', text);
@@ -1026,26 +1256,21 @@
             console.log('Текст:', voiceData.text);
             console.log('Текущий пользователь:', currentUser);
 
-            // Не озвучиваем свои сообщения
             if (voiceData.author === currentUser) {
                 console.log('⏭️ Пропускаем своё сообщение');
                 return;
             }
 
-            // Показываем уведомление
             showToast('🔊 Голосовое сообщение от ' + voiceData.author, voiceData.text);
 
-            // Если вкладка не активна — push-уведомление
             if (document.hidden) {
                 console.log('📱 Вкладка не активна, отправляем push-уведомление');
                 sendPushNotification('🔊 Голосовое сообщение от ' + voiceData.author, voiceData.text);
             }
 
-            // Воспроизводим
             console.log('🔊 Начинаем озвучку...');
             speakTextSimple(voiceData.text);
 
-            // Удаляем через 10 секунд
             setTimeout(() => {
                 snapshot.ref.remove();
                 console.log('🗑️ Сообщение удалено из Firebase');
@@ -1065,7 +1290,6 @@
             return;
         }
 
-        // Загружаем голоса
         const voices = window.speechSynthesis.getVoices();
         console.log('Доступные голоса:', voices.length);
         
@@ -1074,13 +1298,9 @@
             console.log('Голоса обновлены, доступно:', newVoices.length);
         };
 
-        // Отключаем старые слушатели
         database.ref('voiceMessages').off();
-
-        // Запускаем слушатель
         listenVoiceMessages();
 
-        // Обработчики кнопок
         const voiceBtn = document.getElementById('voiceBtn');
         const voiceInput = document.getElementById('voiceInput');
 
@@ -1436,7 +1656,6 @@
 
         checkVerificationNotification();
 
-        // Панель озвучки — только для Данилы
         if (currentUser === 'Данила' && verified) {
             voicePanel.classList.add('show');
             document.getElementById('voiceBtn').disabled = false;
@@ -1453,6 +1672,293 @@
             adminCodeEl.classList.remove('show');
         }
     }
+
+    // ================================================================
+    // ⭐ НОВЫЙ РАЗДЕЛ: ДОСТАВКА НА ДОМ — ЗАЯВКИ ОТ КЛИЕНТОВ
+    // ================================================================
+    
+    // Слушаем заявки из Firebase
+    function listenHomeDeliveryOrders() {
+        const ordersRef = database.ref('homeDelivery/orders');
+        
+        ordersRef.on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            allOrders = data;
+            renderOrderList(data);
+            // Если выбранный заказ ещё существует — показываем его, иначе сбрасываем
+            if (selectedOrderId && data[selectedOrderId]) {
+                renderOrderDetail(selectedOrderId, data[selectedOrderId]);
+            } else if (selectedOrderId) {
+                selectedOrderId = null;
+                renderOrderDetail(null, null);
+            } else {
+                // Если есть заказы, выбираем первый
+                const keys = Object.keys(data);
+                if (keys.length > 0 && !selectedOrderId) {
+                    selectedOrderId = keys[0];
+                    renderOrderDetail(selectedOrderId, data[selectedOrderId]);
+                } else if (keys.length === 0) {
+                    renderOrderDetail(null, null);
+                }
+            }
+            updateOrderCount(data);
+        });
+    }
+
+    function updateOrderCount(data) {
+        const countEl = document.getElementById('homeDeliveryCount');
+        const count = data ? Object.keys(data).length : 0;
+        countEl.textContent = `Заявок: ${count}`;
+    }
+
+    function renderOrderList(data) {
+        const container = document.getElementById('orderListItems');
+        
+        if (!data || Object.keys(data).length === 0) {
+            container.innerHTML = `
+                <div style="color:rgba(255,255,255,0.3);text-align:center;padding:20px 0;font-size:14px;">
+                    📭 Нет заказов
+                </div>
+            `;
+            return;
+        }
+
+        const orders = Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+        }));
+
+        // Сортируем: новые сверху
+        orders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        container.innerHTML = orders.map(order => {
+            const statusMap = {
+                'new': 'status-badge-new',
+                'transit': 'status-badge-transit',
+                'delivered': 'status-badge-delivered',
+                'cancelled': 'status-badge-cancelled'
+            };
+            const statusLabel = {
+                'new': '🆕 Новая',
+                'transit': '🚚 В пути',
+                'delivered': '✅ Доставлен',
+                'cancelled': '❌ Отменён'
+            };
+            const statusClass = statusMap[order.status] || 'status-badge-new';
+            const label = statusLabel[order.status] || '🆕 Новая';
+            const isActive = selectedOrderId === order.id;
+            const time = order.createdAt ? new Date(order.createdAt).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}) : '—';
+            
+            return `
+                <div class="order-list-item ${isActive ? 'active' : ''}" data-id="${order.id}">
+                    <div class="order-id">№ ${order.orderId || order.id.slice(0, 8)}</div>
+                    <div class="order-status-badge ${statusClass}">${label}</div>
+                    <div class="order-meta">${order.firstName || ''} ${order.lastName || ''} · ${time}</div>
+                </div>
+            `;
+        }).join('');
+
+        // Обработчики клика по элементам списка
+        container.querySelectorAll('.order-list-item').forEach(el => {
+            el.addEventListener('click', function() {
+                const id = this.dataset.id;
+                if (id && allOrders[id]) {
+                    selectedOrderId = id;
+                    renderOrderList(allOrders);
+                    renderOrderDetail(id, allOrders[id]);
+                }
+            });
+        });
+    }
+
+    function renderOrderDetail(id, order) {
+        const container = document.getElementById('orderDetail');
+        
+        if (!id || !order) {
+            container.innerHTML = `
+                <div class="empty-detail">
+                    <span class="icon">👆</span>
+                    <span>Выберите заказ из списка слева</span>
+                </div>
+            `;
+            return;
+        }
+
+        const statusMap = {
+            'new': 'status-label-new',
+            'transit': 'status-label-transit',
+            'delivered': 'status-label-delivered',
+            'cancelled': 'status-label-cancelled'
+        };
+        const statusLabel = {
+            'new': '🆕 Новая',
+            'transit': '🚚 В пути',
+            'delivered': '✅ Доставлена',
+            'cancelled': '❌ Отменена'
+        };
+        const statusClass = statusMap[order.status] || 'status-label-new';
+        const label = statusLabel[order.status] || '🆕 Новая';
+
+        const time = order.createdAt ? new Date(order.createdAt).toLocaleString() : '—';
+        const isCreator = currentUser && isVerified(currentUser);
+
+        // Подготовка координат для карты
+        let lat = null, lng = null;
+        if (order.lat && order.lng) {
+            lat = parseFloat(order.lat);
+            lng = parseFloat(order.lng);
+        }
+
+        container.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+                <h3 style="font-size:20px;font-weight:700;color:#1a1a2e;">Заказ №${order.orderId || id.slice(0, 8)}</h3>
+                <span class="current-status-label ${statusClass}">${label}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Имя</span>
+                <span class="value">${order.firstName || '—'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Фамилия</span>
+                <span class="value">${order.lastName || '—'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Телефон</span>
+                <span class="value phone">${order.phone || '—'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Адрес доставки</span>
+                <span class="value">${order.address || '—'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Штрих-код</span>
+                <span class="value" style="font-family:monospace;font-size:14px;">${order.barcode || '—'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Стоимость</span>
+                <span class="value price">${order.price || '0 ₽'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Расстояние</span>
+                <span class="value">${order.distance || '—'}</span>
+            </div>
+            <div class="detail-row" style="border-bottom:none;">
+                <span class="label">Время заказа</span>
+                <span class="value" style="font-size:13px;color:#888;">${time}</span>
+            </div>
+
+            ${lat && lng ? `
+                <div class="detail-map">
+                    <div id="orderDetailMap"></div>
+                </div>
+            ` : `
+                <div style="margin-top:12px;padding:12px;background:#f5f5f5;border-radius:10px;text-align:center;color:#999;font-size:13px;">
+                    🗺️ Координаты не указаны
+                </div>
+            `}
+
+            <div class="detail-status-control">
+                <span class="label">Изменить статус:</span>
+                <select id="detailStatusSelect" ${!isCreator ? 'disabled' : ''}>
+                    <option value="new" ${order.status === 'new' ? 'selected' : ''}>🆕 Новая</option>
+                    <option value="transit" ${order.status === 'transit' ? 'selected' : ''}>🚚 В пути</option>
+                    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>✅ Доставлена</option>
+                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>❌ Отменена</option>
+                </select>
+                <button id="detailStatusBtn" ${!isCreator ? 'disabled' : ''}>Обновить</button>
+                ${!isCreator ? '<span style="font-size:12px;color:#999;margin-left:8px;">🔒 Только верифицированные могут менять статус</span>' : ''}
+            </div>
+        `;
+
+        // Инициализация карты
+        if (lat && lng) {
+            setTimeout(() => {
+                const mapContainer = document.getElementById('orderDetailMap');
+                if (mapContainer) {
+                    if (mapInstance) {
+                        mapInstance.remove();
+                        mapInstance = null;
+                    }
+                    mapInstance = L.map('orderDetailMap').setView([lat, lng], 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; OpenStreetMap'
+                    }).addTo(mapInstance);
+                    L.marker([lat, lng], {
+                        draggable: false
+                    }).addTo(mapInstance)
+                    .bindTooltip('📍 Адрес доставки', {permanent: false, direction: 'top'});
+                    
+                    setTimeout(() => {
+                        mapInstance.invalidateSize();
+                    }, 300);
+                }
+            }, 100);
+        }
+
+        // Обработчики для изменения статуса
+        const statusSelect = document.getElementById('detailStatusSelect');
+        const statusBtn = document.getElementById('detailStatusBtn');
+
+        if (statusBtn) {
+            statusBtn.addEventListener('click', function() {
+                if (!isCreator) {
+                    showToast('⚠️ Доступ запрещён', 'Пройдите верификацию!');
+                    return;
+                }
+                const newStatus = statusSelect ? statusSelect.value : 'new';
+                updateHomeDeliveryStatus(id, newStatus);
+            });
+        }
+    }
+
+    function updateHomeDeliveryStatus(orderId, status) {
+        if (!currentUser) return;
+        if (!isVerified(currentUser)) {
+            showToast('⚠️ Доступ запрещён', 'Пройдите верификацию!');
+            return;
+        }
+        
+        const orderRef = database.ref(`homeDelivery/orders/${orderId}`);
+        orderRef.update({
+            status: status,
+            updatedBy: currentUser,
+            updatedAt: Date.now()
+        }).then(() => {
+            showToast('✅ Статус обновлён', `Заказ №${orderId} → ${status}`);
+            // Обновляем данные в allOrders
+            if (allOrders[orderId]) {
+                allOrders[orderId].status = status;
+                renderOrderList(allOrders);
+                renderOrderDetail(orderId, allOrders[orderId]);
+            }
+        }).catch(() => {
+            showToast('❌ Ошибка', 'Не удалось обновить статус');
+        });
+    }
+
+    function deleteHomeDeliveryOrder(orderId) {
+        if (!currentUser) return;
+        if (!isVerified(currentUser)) {
+            showToast('⚠️ Доступ запрещён', 'Пройдите верификацию!');
+            return;
+        }
+        
+        const orderRef = database.ref(`homeDelivery/orders/${orderId}`);
+        orderRef.remove().then(() => {
+            showToast('🗑️ Заявка удалена', `Заказ №${orderId} удалён`);
+            if (selectedOrderId === orderId) {
+                selectedOrderId = null;
+            }
+        }).catch(() => {
+            showToast('❌ Ошибка', 'Не удалось удалить заявку');
+        });
+    }
+
+    // ================================================================
+    // КОНЕЦ РАЗДЕЛА ДОСТАВКА НА ДОМ
+    // ================================================================
 
     // ============================================================
     // ДОСТАВКА
@@ -1606,7 +2112,6 @@
             dateDiv.textContent = day;
             cell.appendChild(dateDiv);
 
-            // Ozon
             const ozonRow = document.createElement('div');
             ozonRow.className = 'employee-row';
             const ozonLabel = document.createElement('span');
@@ -1628,7 +2133,6 @@
             ozonRow.appendChild(ozonInput);
             cell.appendChild(ozonRow);
 
-            // WB
             const wbRow = document.createElement('div');
             wbRow.className = 'employee-row';
             const wbLabel = document.createElement('span');
@@ -1716,7 +2220,9 @@
         loadScheduleData();
         loadAdminCode();
 
-        // Инициализация озвучки
+        // ⭐ Слушаем заявки на доставку на дом
+        listenHomeDeliveryOrders();
+
         initVoiceMessages();
     }
 
@@ -1946,10 +2452,17 @@
         database.ref('verifiedUsers').off();
         database.ref('adminCode').off();
         database.ref('voiceMessages').off();
+        database.ref('homeDelivery/orders').off();
 
         if (adminCodeInterval) {
             clearInterval(adminCodeInterval);
             adminCodeInterval = null;
+        }
+
+        // Очищаем карту
+        if (mapInstance) {
+            mapInstance.remove();
+            mapInstance = null;
         }
     }
 
@@ -2030,6 +2543,13 @@
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         const targetId = tab === 'ozon' ? 'tabOzon' : tab === 'wb' ? 'tabWb' : tab === 'delivery' ? 'tabDelivery' : tab === 'homeDelivery' ? 'tabHomeDelivery' : tab === 'schedule' ? 'tabSchedule' : 'tabVerification';
         document.getElementById(targetId).classList.add('active');
+        
+        // Если переключились на вкладку доставки на дом — обновляем карту
+        if (tab === 'homeDelivery' && selectedOrderId && allOrders[selectedOrderId]) {
+            setTimeout(() => {
+                renderOrderDetail(selectedOrderId, allOrders[selectedOrderId]);
+            }, 100);
+        }
     });
 
     setInterval(() => {
@@ -2061,6 +2581,8 @@
     console.log('✅ showToast доступна:', typeof showToast);
     console.log('🔔 Push-уведомления со звуком включены');
     console.log('🎙️ Озвучка доступна только для Данилы');
+    console.log('🏠 Раздел "Доставка на дом" полностью обновлён!');
+    console.log('📋 Вкладки с заказами, детали с картой и статусы: В пути, Приехал, Отменен');
     </script>
 
 </body>
