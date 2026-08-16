@@ -2649,18 +2649,60 @@
                 console.log('🎵 Получен MP3:', data.filename || 'audio.mp3');
                 console.log('📤 Отправитель:', data.author || 'Неизвестно');
                 
-                // Воспроизводим MP3
-                playMP3FromBase64(data.mp3_data, data.filename);
-                
-                // Удаляем из Firebase после воспроизведения
-                setTimeout(() => {
-                    snapshot.ref.remove();
-                    console.log('🗑️ MP3 удалён из Firebase');
-                }, 5000);
-            }
+               // Воспроизведение MP3 по URL из Firebase Storage
+function playMP3FromURL(url, filename) {
+    try {
+        const audio = new Audio(url);
+        audio.volume = 1.0;
+        
+        showToast('🎵 Воспроизведение MP3', `Файл: ${filename || 'audio.mp3'}`);
+        
+        audio.play().then(() => {
+            console.log('✅ MP3 воспроизводится:', filename);
+        }).catch((error) => {
+            console.error('❌ Ошибка:', error);
+            showToast('❌ Ошибка', 'Не удалось воспроизвести MP3');
         });
+        
+        audio.onended = function() {
+            console.log('✅ MP3 завершён');
+        };
+        
+        audio.onerror = function() {
+            showToast('⚠️ Внимание', 'Нажмите на страницу для воспроизведения');
+        };
+        
+    } catch (error) {
+        console.error('❌ Ошибка:', error);
+        showToast('❌ Ошибка', 'Не удалось воспроизвести MP3');
     }
+}
 
+// Обновлённый слушатель
+function listenMP3Messages() {
+    const voiceRef = database.ref('voiceMessages');
+    
+    voiceRef.on('child_added', (snapshot) => {
+        const data = snapshot.val();
+        
+        if (data.type === 'mp3') {
+            if (data.mp3_url) {
+                // Новый способ — через URL
+                console.log('🎵 Получен MP3 (URL):', data.filename);
+                playMP3FromURL(data.mp3_url, data.filename);
+            } else if (data.mp3_data) {
+                // Старый способ — через base64 (для маленьких файлов)
+                console.log('🎵 Получен MP3 (base64):', data.filename);
+                playMP3FromBase64(data.mp3_data, data.filename);
+            }
+            
+            setTimeout(() => {
+                snapshot.ref.remove();
+                console.log('🗑️ MP3 удалён из Firebase');
+            }, 5000);
+        }
+    });
+}
     // Инициализация MP3 слушателя
     function initMP3Receiver() {
         console.log('🎵 MP3 Receiver инициализирован');
