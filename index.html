@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ozon · WorkHub</title>
     
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
@@ -486,254 +485,267 @@
 </head>
 <body>
 
-<div class="update-overlay" id="updateOverlay">
-    <div class="update-card">
-        <div class="icon">🔄</div>
-        <h2>Доступно обновление!</h2>
-        <p>Вышла новая версия приложения.<br>Обновите страницу для продолжения работы.</p>
-        <div class="version-info">
-            Текущая версия: <span id="currentVersionText">—</span><br>
-            Новая версия: <span id="newVersionText">—</span>
-        </div>
-        <button class="update-btn" id="updateBtn">🔄 Обновить сейчас</button>
-        <div class="update-sub">После обновления все данные сохранятся</div>
-    </div>
-</div>
-
-<div class="loading-screen" id="loadingScreen">
-    <div class="loading-logo">OzonWeb</div>
-    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
-    <div class="progress-text" id="progressText">0%</div>
-    <div class="status-phrase" id="statusPhrase"><span class="emoji">📦</span> Разбираем посылки</div>
-</div>
-
-<div class="login-overlay" id="loginOverlay">
-    <div class="login-card">
-        <h1>🔐 Ozon WorkHub</h1>
-        <div class="sub">Войдите в рабочий портал</div>
-        <label>👤 Имя пользователя</label>
-        <input type="text" id="loginUsername" placeholder="Введите ваше имя">
-        <label>🔑 Пароль</label>
-        <input type="password" id="loginPassword" placeholder="Введите пароль">
-        <button class="login-btn" id="loginBtn">🚀 Войти</button>
-        <div class="login-error" id="loginError"></div>
-        <div class="login-users">
-            <p><strong>👤 Александр</strong> — пароль: <strong>••••••••</strong></p>
-            <p><strong>👤 Сергей</strong> — пароль: <strong>••••••••</strong></p>
-            <p><strong>👤 Данила</strong> — пароль: <strong>••••••••</strong></p>
-            <div class="hint">⚠️ Пароли скрыты для безопасности</div>
-        </div>
-    </div>
-</div>
-
-<div class="verification-notification" id="verificationNotif">
-    <div class="notif-header">
-        <span class="notif-title">⚠️ У вас не подтверждённый аккаунт!</span>
-        <button class="notif-close" id="notifClose">✕</button>
-    </div>
-    <div class="notif-text">Нажмите здесь, чтобы пройти верификацию</div>
-</div>
-
-<div class="toast-container" id="toastContainer"></div>
-
-<div class="app-wrapper" id="appWrapper">
-    <div class="header">
-        <div class="logo-area">
-            <div class="logo-icon"><img src="https://media.tenor.com/Uut9DUPDPcAAAAAi/plush-pepe-rainbow.gif" alt="Logo"></div>
-            <h1>Ozon · WorkHub</h1>
-        </div>
-        <div class="admin-code" id="adminCode">🔑 Код админа: <strong id="adminCodeText">—</strong></div>
-        <div class="user-panel">
-            <div class="user-badge">
-                <span>👤</span> <span id="currentUserName">Гость</span>
-                <span class="verified-badge" id="verifiedBadge">✅</span>
+    <!-- ОБНОВЛЕНИЕ -->
+    <div class="update-overlay" id="updateOverlay">
+        <div class="update-card">
+            <div class="icon">🔄</div>
+            <h2>Доступно обновление!</h2>
+            <p>Вышла новая версия приложения.<br>Обновите страницу для продолжения работы.</p>
+            <div class="version-info">
+                Текущая версия: <span id="currentVersionText">—</span><br>
+                Новая версия: <span id="newVersionText">—</span>
             </div>
-            <button class="logout-btn" id="logoutBtn">Выйти</button>
+            <button class="update-btn" id="updateBtn">🔄 Обновить сейчас</button>
+            <div class="update-sub">После обновления все данные сохранятся</div>
         </div>
     </div>
 
-    <div class="voice-panel" id="voicePanel">
-        <div class="voice-label"><span class="mic-icon">🎙️</span> <span>Озвучка для всех</span></div>
-        <input type="text" id="voiceInput" placeholder="Введите текст для озвучки...">
-        <button class="voice-btn" id="voiceBtn">🔊 Озвучить</button>
-        <span class="voice-status" id="voiceStatus">● <span class="online">Готов</span></span>
+    <!-- ЗАГРУЗКА -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo">OzonWeb</div>
+        <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="progress-text" id="progressText">0%</div>
+        <div class="status-phrase" id="statusPhrase"><span class="emoji">📦</span> Разбираем посылки</div>
     </div>
 
-    <div class="main-content">
-        <div class="tabs" id="tabHeaders">
-            <button class="tab-btn active" data-tab="ozon">📦 Ozon</button>
-            <button class="tab-btn" data-tab="wb">🛒 WB</button>
-            <button class="tab-btn" data-tab="delivery">🚚 Доставка</button>
-            <button class="tab-btn" data-tab="homeDelivery">🏠 Доставка на дом</button>
-            <button class="tab-btn" data-tab="schedule">📅 График</button>
-            <button class="tab-btn verification-tab" data-tab="verification" id="verificationTabBtn">✅ Верификация</button>
-        </div>
-
-        <div class="tab-content active" id="tabOzon">
-            <div class="card">
-                <div class="card-title">💬 Чат Ozon <small>онлайн</small></div>
-                <div class="chat-messages" id="chatOzon"><div class="empty-state"><div class="icon">💬</div><p>Нет сообщений</p></div></div>
-                <div class="msg-input-row">
-                    <input type="text" id="ozonMsgInput" placeholder="Напишите сообщение...">
-                    <button id="ozonSendBtn">Отправить</button>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-title">📋 Задачи Ozon <span class="count" id="ozonTaskCount">0</span></div>
-                <div class="task-list" id="tasksOzon"><div class="empty-state"><div class="icon">📝</div><p>Нет задач</p></div></div>
-                <div class="add-task-row">
-                    <input type="text" id="ozonTaskInput" placeholder="Новая задача...">
-                    <select id="ozonAssignSelect"></select>
-                    <button id="ozonTaskAdd">+</button>
-                </div>
-                <div style="margin-top:8px;font-size:12px;color:#999;">🔒 Только создатель может изменять или удалять</div>
-            </div>
-            <div class="card" style="border-left:4px solid #ff9800;">
-                <div class="card-title">🔍 Потерянные товары Ozon <span class="count" id="ozonLostCount">0</span></div>
-                <div class="lost-items-grid" id="ozonLostItems"><div class="empty-state"><div class="icon">🔍</div><p>Нет потерянных товаров</p></div></div>
-                <div class="add-lost-row">
-                    <input type="text" id="ozonLostSku" placeholder="ШК товара (цифры с буквами)">
-                    <input type="text" id="ozonLostWhere" placeholder="Где должен быть товар">
-                    <textarea id="ozonLostDesc" placeholder="Описание: как потерялся, обстоятельства..."></textarea>
-                    <button class="lost-btn" id="ozonLostAdd">➕ Добавить потерянный товар</button>
-                </div>
+    <!-- ВХОД -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <h1>🔐 Ozon WorkHub</h1>
+            <div class="sub">Войдите в рабочий портал</div>
+            <label>👤 Имя пользователя</label>
+            <input type="text" id="loginUsername" placeholder="Введите ваше имя">
+            <label>🔑 Пароль</label>
+            <input type="password" id="loginPassword" placeholder="Введите пароль">
+            <button class="login-btn" id="loginBtn">🚀 Войти</button>
+            <div class="login-error" id="loginError"></div>
+            <div class="login-users">
+                <p><strong>👤 Александр</strong> — пароль: <strong>••••••••</strong></p>
+                <p><strong>👤 Сергей</strong> — пароль: <strong>••••••••</strong></p>
+                <p><strong>👤 Данила</strong> — пароль: <strong>••••••••</strong></p>
+                <div class="hint">⚠️ Пароли скрыты для безопасности</div>
             </div>
         </div>
+    </div>
 
-        <div class="tab-content" id="tabWb">
-            <div class="card">
-                <div class="card-title">💬 Чат WB <small>онлайн</small></div>
-                <div class="chat-messages" id="chatWb"><div class="empty-state"><div class="icon">💬</div><p>Нет сообщений</p></div></div>
-                <div class="msg-input-row">
-                    <input type="text" id="wbMsgInput" placeholder="Напишите сообщение...">
-                    <button id="wbSendBtn">Отправить</button>
-                </div>
+    <!-- ВЕРИФИКАЦИЯ -->
+    <div class="verification-notification" id="verificationNotif">
+        <div class="notif-header">
+            <span class="notif-title">⚠️ У вас не подтверждённый аккаунт!</span>
+            <button class="notif-close" id="notifClose">✕</button>
+        </div>
+        <div class="notif-text">Нажмите здесь, чтобы пройти верификацию</div>
+    </div>
+
+    <!-- ТОСТЫ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+    <div class="app-wrapper" id="appWrapper">
+        <div class="header">
+            <div class="logo-area">
+                <div class="logo-icon"><img src="https://media.tenor.com/Uut9DUPDPcAAAAAi/plush-pepe-rainbow.gif" alt="Logo"></div>
+                <h1>Ozon · WorkHub</h1>
             </div>
-            <div class="card">
-                <div class="card-title">📋 Задачи WB <span class="count" id="wbTaskCount">0</span></div>
-                <div class="task-list" id="tasksWb"><div class="empty-state"><div class="icon">📝</div><p>Нет задач</p></div></div>
-                <div class="add-task-row">
-                    <input type="text" id="wbTaskInput" placeholder="Новая задача...">
-                    <select id="wbAssignSelect"></select>
-                    <button id="wbTaskAdd">+</button>
+            <div class="admin-code" id="adminCode">🔑 Код админа: <strong id="adminCodeText">—</strong></div>
+            <div class="user-panel">
+                <div class="user-badge">
+                    <span>👤</span> <span id="currentUserName">Гость</span>
+                    <span class="verified-badge" id="verifiedBadge">✅</span>
                 </div>
-                <div style="margin-top:8px;font-size:12px;color:#999;">🔒 Только создатель может изменять или удалять</div>
-            </div>
-            <div class="card" style="border-left:4px solid #ff9800;">
-                <div class="card-title">🔍 Потерянные товары WB <span class="count" id="wbLostCount">0</span></div>
-                <div class="lost-items-grid" id="wbLostItems"><div class="empty-state"><div class="icon">🔍</div><p>Нет потерянных товаров</p></div></div>
-                <div class="add-lost-row">
-                    <input type="text" id="wbLostSku" placeholder="ШК товара (цифры с буквами)">
-                    <input type="text" id="wbLostWhere" placeholder="Где должен быть товар">
-                    <textarea id="wbLostDesc" placeholder="Описание: как потерялся, обстоятельства..."></textarea>
-                    <button class="lost-btn" id="wbLostAdd">➕ Добавить потерянный товар</button>
-                </div>
+                <button class="logout-btn" id="logoutBtn">Выйти</button>
             </div>
         </div>
 
-        <div class="tab-content" id="tabDelivery">
-            <div class="delivery-content">
-                <div class="delivery-stats">
-                    <div class="delivery-card" style="border-color:rgba(0,91,255,0.3);">
-                        <div class="icon">📦</div>
-                        <div class="label">Ozon</div>
-                        <div class="count" style="color:#005bff;" id="ozonDeliveryCount">0</div>
-                        <div class="sub">отправлений</div>
-                        <div class="meta">👤 Обновлено: <span id="ozonDeliveryUpdater">—</span></div>
-                        <div class="controls" id="ozonDeliveryControls">
-                            <input type="number" id="ozonDeliveryInput" placeholder="Кол-во" min="0">
-                            <button id="ozonDeliveryBtn" style="background:linear-gradient(135deg,#005bff,#7f3bff);color:white;">Обновить</button>
+        <!-- ПАНЕЛЬ ОЗВУЧКИ -->
+        <div class="voice-panel" id="voicePanel">
+            <div class="voice-label"><span class="mic-icon">🎙️</span> <span>Озвучка для всех</span></div>
+            <input type="text" id="voiceInput" placeholder="Введите текст для озвучки...">
+            <button class="voice-btn" id="voiceBtn">🔊 Озвучить</button>
+            <span class="voice-status" id="voiceStatus">● <span class="online">Готов</span></span>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs" id="tabHeaders">
+                <button class="tab-btn active" data-tab="ozon">📦 Ozon</button>
+                <button class="tab-btn" data-tab="wb">🛒 WB</button>
+                <button class="tab-btn" data-tab="delivery">🚚 Доставка</button>
+                <button class="tab-btn" data-tab="homeDelivery">🏠 Доставка на дом</button>
+                <button class="tab-btn" data-tab="schedule">📅 График</button>
+                <button class="tab-btn verification-tab" data-tab="verification" id="verificationTabBtn">✅ Верификация</button>
+            </div>
+
+            <!-- OZON -->
+            <div class="tab-content active" id="tabOzon">
+                <div class="card">
+                    <div class="card-title">💬 Чат Ozon <small>онлайн</small></div>
+                    <div class="chat-messages" id="chatOzon"><div class="empty-state"><div class="icon">💬</div><p>Нет сообщений</p></div></div>
+                    <div class="msg-input-row">
+                        <input type="text" id="ozonMsgInput" placeholder="Напишите сообщение...">
+                        <button id="ozonSendBtn">Отправить</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">📋 Задачи Ozon <span class="count" id="ozonTaskCount">0</span></div>
+                    <div class="task-list" id="tasksOzon"><div class="empty-state"><div class="icon">📝</div><p>Нет задач</p></div></div>
+                    <div class="add-task-row">
+                        <input type="text" id="ozonTaskInput" placeholder="Новая задача...">
+                        <select id="ozonAssignSelect"></select>
+                        <button id="ozonTaskAdd">+</button>
+                    </div>
+                    <div style="margin-top:8px;font-size:12px;color:#999;">🔒 Только создатель может изменять или удалять</div>
+                </div>
+                <div class="card" style="border-left:4px solid #ff9800;">
+                    <div class="card-title">🔍 Потерянные товары Ozon <span class="count" id="ozonLostCount">0</span></div>
+                    <div class="lost-items-grid" id="ozonLostItems"><div class="empty-state"><div class="icon">🔍</div><p>Нет потерянных товаров</p></div></div>
+                    <div class="add-lost-row">
+                        <input type="text" id="ozonLostSku" placeholder="ШК товара (цифры с буквами)">
+                        <input type="text" id="ozonLostWhere" placeholder="Где должен быть товар">
+                        <textarea id="ozonLostDesc" placeholder="Описание: как потерялся, обстоятельства..."></textarea>
+                        <button class="lost-btn" id="ozonLostAdd">➕ Добавить потерянный товар</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WB -->
+            <div class="tab-content" id="tabWb">
+                <div class="card">
+                    <div class="card-title">💬 Чат WB <small>онлайн</small></div>
+                    <div class="chat-messages" id="chatWb"><div class="empty-state"><div class="icon">💬</div><p>Нет сообщений</p></div></div>
+                    <div class="msg-input-row">
+                        <input type="text" id="wbMsgInput" placeholder="Напишите сообщение...">
+                        <button id="wbSendBtn">Отправить</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">📋 Задачи WB <span class="count" id="wbTaskCount">0</span></div>
+                    <div class="task-list" id="tasksWb"><div class="empty-state"><div class="icon">📝</div><p>Нет задач</p></div></div>
+                    <div class="add-task-row">
+                        <input type="text" id="wbTaskInput" placeholder="Новая задача...">
+                        <select id="wbAssignSelect"></select>
+                        <button id="wbTaskAdd">+</button>
+                    </div>
+                    <div style="margin-top:8px;font-size:12px;color:#999;">🔒 Только создатель может изменять или удалять</div>
+                </div>
+                <div class="card" style="border-left:4px solid #ff9800;">
+                    <div class="card-title">🔍 Потерянные товары WB <span class="count" id="wbLostCount">0</span></div>
+                    <div class="lost-items-grid" id="wbLostItems"><div class="empty-state"><div class="icon">🔍</div><p>Нет потерянных товаров</p></div></div>
+                    <div class="add-lost-row">
+                        <input type="text" id="wbLostSku" placeholder="ШК товара (цифры с буквами)">
+                        <input type="text" id="wbLostWhere" placeholder="Где должен быть товар">
+                        <textarea id="wbLostDesc" placeholder="Описание: как потерялся, обстоятельства..."></textarea>
+                        <button class="lost-btn" id="wbLostAdd">➕ Добавить потерянный товар</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ДОСТАВКА -->
+            <div class="tab-content" id="tabDelivery">
+                <div class="delivery-content">
+                    <div class="delivery-stats">
+                        <div class="delivery-card" style="border-color:rgba(0,91,255,0.3);">
+                            <div class="icon">📦</div>
+                            <div class="label">Ozon</div>
+                            <div class="count" style="color:#005bff;" id="ozonDeliveryCount">0</div>
+                            <div class="sub">отправлений</div>
+                            <div class="meta">👤 Обновлено: <span id="ozonDeliveryUpdater">—</span></div>
+                            <div class="controls" id="ozonDeliveryControls">
+                                <input type="number" id="ozonDeliveryInput" placeholder="Кол-во" min="0">
+                                <button id="ozonDeliveryBtn" style="background:linear-gradient(135deg,#005bff,#7f3bff);color:white;">Обновить</button>
+                            </div>
+                            <div class="lock" id="ozonDeliveryLock">🔒 Только Данила может изменять</div>
                         </div>
-                        <div class="lock" id="ozonDeliveryLock">🔒 Только Данила может изменять</div>
-                    </div>
-                    <div class="delivery-card" style="border-color:rgba(155,77,255,0.3);">
-                        <div class="icon">🛒</div>
-                        <div class="label">WB</div>
-                        <div class="count" style="color:#9b4dff;" id="wbDeliveryCount">0</div>
-                        <div class="sub">отправлений</div>
-                        <div class="meta">👤 Обновлено: <span id="wbDeliveryUpdater">—</span></div>
-                        <div class="controls" id="wbDeliveryControls">
-                            <input type="number" id="wbDeliveryInput" placeholder="Кол-во" min="0">
-                            <button id="wbDeliveryBtn" style="background:linear-gradient(135deg,#9b4dff,#6b2fa0);color:white;">Обновить</button>
+                        <div class="delivery-card" style="border-color:rgba(155,77,255,0.3);">
+                            <div class="icon">🛒</div>
+                            <div class="label">WB</div>
+                            <div class="count" style="color:#9b4dff;" id="wbDeliveryCount">0</div>
+                            <div class="sub">отправлений</div>
+                            <div class="meta">👤 Обновлено: <span id="wbDeliveryUpdater">—</span></div>
+                            <div class="controls" id="wbDeliveryControls">
+                                <input type="number" id="wbDeliveryInput" placeholder="Кол-во" min="0">
+                                <button id="wbDeliveryBtn" style="background:linear-gradient(135deg,#9b4dff,#6b2fa0);color:white;">Обновить</button>
+                            </div>
+                            <div class="lock" id="wbDeliveryLock">🔒 Только Данила может изменять</div>
                         </div>
-                        <div class="lock" id="wbDeliveryLock">🔒 Только Данила может изменять</div>
                     </div>
-                </div>
-                <div class="delivery-status">
-                    <div>
-                        <span class="status-label">📊 Статус доставки:</span>
-                        <span class="current-status" id="deliveryStatusDisplay">—</span>
+                    <div class="delivery-status">
+                        <div>
+                            <span class="status-label">📊 Статус доставки:</span>
+                            <span class="current-status" id="deliveryStatusDisplay">—</span>
+                        </div>
+                        <div class="status-buttons" id="deliveryStatusControls">
+                            <button data-status="Идет" id="statusGoing">🚚 Идет</button>
+                            <button data-status="Принимаем" id="statusReceiving">📥 Принимаем</button>
+                            <button data-status="Принято" id="statusReceived">✅ Принято</button>
+                        </div>
+                        <div style="font-size:12px;color:#999;">🔒 Только Данила может менять статус</div>
                     </div>
-                    <div class="status-buttons" id="deliveryStatusControls">
-                        <button data-status="Идет" id="statusGoing">🚚 Идет</button>
-                        <button data-status="Принимаем" id="statusReceiving">📥 Принимаем</button>
-                        <button data-status="Принято" id="statusReceived">✅ Принято</button>
-                    </div>
-                    <div style="font-size:12px;color:#999;">🔒 Только Данила может менять статус</div>
                 </div>
             </div>
-        </div>
 
-        <div class="tab-content" id="tabHomeDelivery">
-            <div class="home-delivery-content">
-                <div class="home-delivery-card">
-                    <div class="icon">🏠</div>
-                    <h2>Доставка на дом</h2>
-                    <p>Доставка на дом пока что в разработке<br><span style="font-weight:500;color:#1a1a2e;">Скоро можно возить товары прямо домой!</span></p>
-                    <div class="badge">🚧 В разработке</div>
-                    <div class="sub-badge">Ожидайте запуска в ближайшее время</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tab-content" id="tabSchedule">
-            <div class="schedule-content">
-                <div class="schedule-header">
-                    <div class="schedule-nav">
-                        <button id="schedulePrevMonth">◀</button>
-                        <span class="schedule-month" id="scheduleMonthYear">Январь 2026</span>
-                        <button id="scheduleNextMonth">▶</button>
-                    </div>
-                    <div class="schedule-info">
-                        <span>✏️ Все сотрудники могут редактировать</span>
-                        <button class="schedule-today-btn" id="scheduleTodayBtn">📅 Сегодня</button>
+            <!-- ДОСТАВКА НА ДОМ -->
+            <div class="tab-content" id="tabHomeDelivery">
+                <div class="home-delivery-content">
+                    <div class="home-delivery-card">
+                        <div class="icon">🏠</div>
+                        <h2>Доставка на дом</h2>
+                        <p>Доставка на дом пока что в разработке<br><span style="font-weight:500;color:#1a1a2e;">Скоро можно возить товары прямо домой!</span></p>
+                        <div class="badge">🚧 В разработке</div>
+                        <div class="sub-badge">Ожидайте запуска в ближайшее время</div>
                     </div>
                 </div>
-                <div class="schedule-weekdays">
-                    <div class="schedule-weekday">ПН</div>
-                    <div class="schedule-weekday">ВТ</div>
-                    <div class="schedule-weekday">СР</div>
-                    <div class="schedule-weekday">ЧТ</div>
-                    <div class="schedule-weekday">ПТ</div>
-                    <div class="schedule-weekday">СБ</div>
-                    <div class="schedule-weekday">ВС</div>
-                </div>
-                <div class="schedule-grid" id="scheduleGrid"></div>
             </div>
-        </div>
 
-        <div class="tab-content" id="tabVerification">
-            <div class="verification-content">
-                <div class="verification-card" id="verificationCard">
-                    <div class="icon">✅</div>
-                    <h2>Верификация аккаунта</h2>
-                    <div class="sub">Подтвердите свою личность для получения доступа ко всем функциям</div>
-                    <label>👤 Ваше имя</label>
-                    <input type="text" id="verifyName" placeholder="Введите ваше имя">
-                    <label>🔑 Ваш пароль</label>
-                    <input type="password" id="verifyPassword" placeholder="Введите ваш пароль">
-                    <label>🔐 Пароль администратора</label>
-                    <input type="password" id="verifyAdminCode" placeholder="Введите код администратора">
-                    <button class="verify-btn" id="verifyBtn">✅ Пройти верификацию</button>
-                    <div class="error-msg" id="verifyError"></div>
-                    <div class="success-msg" id="verifySuccess"></div>
+            <!-- ГРАФИК -->
+            <div class="tab-content" id="tabSchedule">
+                <div class="schedule-content">
+                    <div class="schedule-header">
+                        <div class="schedule-nav">
+                            <button id="schedulePrevMonth">◀</button>
+                            <span class="schedule-month" id="scheduleMonthYear">Январь 2026</span>
+                            <button id="scheduleNextMonth">▶</button>
+                        </div>
+                        <div class="schedule-info">
+                            <span>✏️ Все сотрудники могут редактировать</span>
+                            <button class="schedule-today-btn" id="scheduleTodayBtn">📅 Сегодня</button>
+                        </div>
+                    </div>
+                    <div class="schedule-weekdays">
+                        <div class="schedule-weekday">ПН</div>
+                        <div class="schedule-weekday">ВТ</div>
+                        <div class="schedule-weekday">СР</div>
+                        <div class="schedule-weekday">ЧТ</div>
+                        <div class="schedule-weekday">ПТ</div>
+                        <div class="schedule-weekday">СБ</div>
+                        <div class="schedule-weekday">ВС</div>
+                    </div>
+                    <div class="schedule-grid" id="scheduleGrid"></div>
+                </div>
+            </div>
+
+            <!-- ВЕРИФИКАЦИЯ -->
+            <div class="tab-content" id="tabVerification">
+                <div class="verification-content">
+                    <div class="verification-card" id="verificationCard">
+                        <div class="icon">✅</div>
+                        <h2>Верификация аккаунта</h2>
+                        <div class="sub">Подтвердите свою личность для получения доступа ко всем функциям</div>
+                        <label>👤 Ваше имя</label>
+                        <input type="text" id="verifyName" placeholder="Введите ваше имя">
+                        <label>🔑 Ваш пароль</label>
+                        <input type="password" id="verifyPassword" placeholder="Введите ваш пароль">
+                        <label>🔐 Пароль администратора</label>
+                        <input type="password" id="verifyAdminCode" placeholder="Введите код администратора">
+                        <button class="verify-btn" id="verifyBtn">✅ Пройти верификацию</button>
+                        <div class="error-msg" id="verifyError"></div>
+                        <div class="success-msg" id="verifySuccess"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
+    <script>
     // ============================================================
     // === ВСЕ ФУНКЦИИ ОБЪЯВЛЕНЫ В НАЧАЛЕ ===
     // ============================================================
@@ -763,7 +775,7 @@
     // ============================================================
     // ВЕРСИЯ
     // ============================================================
-    const APP_VERSION = '2.7.1';
+    const APP_VERSION = '2.8.0';
 
     function getSavedVersion() {
         try { return localStorage.getItem('app_version'); } catch (e) { return null; }
@@ -1014,21 +1026,26 @@
             console.log('Текст:', voiceData.text);
             console.log('Текущий пользователь:', currentUser);
 
+            // Не озвучиваем свои сообщения
             if (voiceData.author === currentUser) {
                 console.log('⏭️ Пропускаем своё сообщение');
                 return;
             }
 
+            // Показываем уведомление
             showToast('🔊 Голосовое сообщение от ' + voiceData.author, voiceData.text);
 
+            // Если вкладка не активна — push-уведомление
             if (document.hidden) {
                 console.log('📱 Вкладка не активна, отправляем push-уведомление');
                 sendPushNotification('🔊 Голосовое сообщение от ' + voiceData.author, voiceData.text);
             }
 
+            // Воспроизводим
             console.log('🔊 Начинаем озвучку...');
             speakTextSimple(voiceData.text);
 
+            // Удаляем через 10 секунд
             setTimeout(() => {
                 snapshot.ref.remove();
                 console.log('🗑️ Сообщение удалено из Firebase');
@@ -1048,6 +1065,7 @@
             return;
         }
 
+        // Загружаем голоса
         const voices = window.speechSynthesis.getVoices();
         console.log('Доступные голоса:', voices.length);
         
@@ -1056,9 +1074,13 @@
             console.log('Голоса обновлены, доступно:', newVoices.length);
         };
 
+        // Отключаем старые слушатели
         database.ref('voiceMessages').off();
+
+        // Запускаем слушатель
         listenVoiceMessages();
 
+        // Обработчики кнопок
         const voiceBtn = document.getElementById('voiceBtn');
         const voiceInput = document.getElementById('voiceInput');
 
@@ -1414,6 +1436,7 @@
 
         checkVerificationNotification();
 
+        // Панель озвучки — только для Данилы
         if (currentUser === 'Данила' && verified) {
             voicePanel.classList.add('show');
             document.getElementById('voiceBtn').disabled = false;
@@ -1583,6 +1606,7 @@
             dateDiv.textContent = day;
             cell.appendChild(dateDiv);
 
+            // Ozon
             const ozonRow = document.createElement('div');
             ozonRow.className = 'employee-row';
             const ozonLabel = document.createElement('span');
@@ -1604,6 +1628,7 @@
             ozonRow.appendChild(ozonInput);
             cell.appendChild(ozonRow);
 
+            // WB
             const wbRow = document.createElement('div');
             wbRow.className = 'employee-row';
             const wbLabel = document.createElement('span');
@@ -1691,6 +1716,7 @@
         loadScheduleData();
         loadAdminCode();
 
+        // Инициализация озвучки
         initVoiceMessages();
     }
 
@@ -2035,6 +2061,7 @@
     console.log('✅ showToast доступна:', typeof showToast);
     console.log('🔔 Push-уведомления со звуком включены');
     console.log('🎙️ Озвучка доступна только для Данилы');
-</script>
+    </script>
+
 </body>
 </html>
