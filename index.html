@@ -399,11 +399,6 @@
             display: inline-block;
             margin-top: 4px;
         }
-        .order-list-item .order-meta {
-            font-size: 12px;
-            color: rgba(255,255,255,0.5);
-            margin-top: 4px;
-        }
         .status-badge-new { background: rgba(0,91,255,0.25); color: #64b5f6; }
         .status-badge-transit { background: rgba(255,152,0,0.25); color: #ffb74d; }
         .status-badge-delivered { background: rgba(76,175,80,0.25); color: #81c784; }
@@ -1000,7 +995,7 @@
     // ============================================================
     // ВЕРСИЯ
     // ============================================================
-    const APP_VERSION = '3.0.0';
+    const APP_VERSION = '3.1.0';
 
     function getSavedVersion() {
         try { return localStorage.getItem('app_version'); } catch (e) { return null; }
@@ -1271,10 +1266,11 @@
             console.log('🔊 Начинаем озвучку...');
             speakTextSimple(voiceData.text);
 
+            // ✅ Увеличил время удаления с 10 до 60 секунд
             setTimeout(() => {
                 snapshot.ref.remove();
-                console.log('🗑️ Сообщение удалено из Firebase');
-            }, 10000);
+                console.log('🗑️ Сообщение удалено из Firebase через 60 секунд');
+            }, 60000);
         });
     }
 
@@ -2583,6 +2579,7 @@
     console.log('🎙️ Озвучка доступна только для Данилы');
     console.log('🏠 Раздел "Доставка на дом" полностью обновлён!');
     console.log('📋 Вкладки с заказами, детали с картой и статусы: В пути, Приехал, Отменен');
+    console.log('🗑️ Голосовые сообщения удаляются через 60 секунд (было 10)');
     </script>
 
 </body>
