@@ -304,7 +304,7 @@
         .status-received { color: #4caf50; background: rgba(76,175,80,0.1); }
 
         /* ================================================================
-           ДОСТАВКА НА ДОМ — ЗАЯВКИ ОТ КЛИЕНТОВ
+           НОВЫЙ РАЗДЕЛ: ДОСТАВКА НА ДОМ — ЗАЯВКИ ОТ КЛИЕНТОВ
            ================================================================ */
         .home-delivery-content {
             flex: 1;
@@ -894,7 +894,7 @@
             </div>
 
             <!-- ================================================================
-                 ДОСТАВКА НА ДОМ — ЗАЯВКИ ОТ КЛИЕНТОВ
+                 ДОСТАВКА НА ДОМ — ЗАЯВКИ ОТ КЛИЕНТОВ (НОВАЯ ВЕРСИЯ)
                  ================================================================ -->
             <div class="tab-content" id="tabHomeDelivery">
                 <div class="home-delivery-content">
@@ -903,12 +903,14 @@
                         <span class="badge" id="homeDeliveryCount">Заявок: 0</span>
                     </div>
                     <div class="home-delivery-orders-wrapper">
+                        <!-- Список заказов (вкладки) -->
                         <div class="home-delivery-order-list" id="orderList">
                             <div class="list-title">📋 Заказы</div>
                             <div id="orderListItems">
                                 <div style="color:rgba(255,255,255,0.3);text-align:center;padding:20px 0;font-size:14px;">Загрузка...</div>
                             </div>
                         </div>
+                        <!-- Детали заказа -->
                         <div class="home-delivery-order-detail" id="orderDetail">
                             <div class="empty-detail">
                                 <span class="icon">👆</span>
@@ -1049,7 +1051,7 @@
     // ДАННЫЕ
     // ============================================================
     const USERS = ['Александр', 'Сергей', 'Данила'];
-    const USER_PASSWORDS = { 'Александр': 'OzonWeb1', 'Сергей': 'OzonWeb3', 'Данила': 'OzonFrag' };
+    const USER_PASSWORDS = { 'Александр': 'OzonWeb1', 'Сергей': 'OzonWeb3', 'Данила': 'OzonWeb2' };
     let currentUser = null;
     let verifiedUsers = {};
     let adminCode = generateAdminCode();
@@ -2222,9 +2224,6 @@
         listenHomeDeliveryOrders();
 
         initVoiceMessages();
-        
-        // ⭐ ИНИЦИАЛИЗАЦИЯ MP3 ПРИЁМНИКА
-        initMP3Receiver();
     }
 
     // ===== ЧАТЫ =====
@@ -2570,127 +2569,6 @@
         }
     }, 300000);
 
-// ================================================================
-// ⭐ АВТОВОСПРОИЗВЕДЕНИЕ MP3 ИЗ FIREBASE
-// ================================================================
-
-function playMP3FromBase64(mp3_data, filename) {
-    try {
-        const binaryString = atob(mp3_data);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-        const blob = new Blob([bytes], { type: 'audio/mpeg' });
-        const url = URL.createObjectURL(blob);
-        
-        const audio = new Audio(url);
-        audio.volume = 1.0;
-        
-        showToast('🎵 Воспроизведение MP3', `Файл: ${filename || 'audio.mp3'}`);
-        
-        audio.play().then(() => {
-            console.log('✅ MP3 воспроизводится:', filename);
-        }).catch((error) => {
-            console.error('❌ Ошибка воспроизведения:', error);
-            showToast('❌ Ошибка', 'Не удалось воспроизвести MP3');
-        });
-        
-        audio.onended = function() {
-            URL.revokeObjectURL(url);
-            console.log('✅ MP3 завершён');
-        };
-        
-        audio.onerror = function() {
-            showToast('⚠️ Внимание', 'Нажмите на страницу для воспроизведения MP3');
-            const playBtn = document.createElement('button');
-            playBtn.textContent = '▶️ Нажмите для воспроизведения MP3';
-            playBtn.style.cssText = `
-                position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-                padding: 15px 40px; background: linear-gradient(135deg, #005bff, #7f3bff);
-                color: white; border: none; border-radius: 14px; font-size: 18px;
-                font-weight: 700; cursor: pointer; z-index: 9999;
-                box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-                animation: pulse 1.5s infinite;
-            `;
-            playBtn.onclick = function() {
-                audio.play();
-                this.remove();
-            };
-            document.body.appendChild(playBtn);
-            
-            setTimeout(() => {
-                if (playBtn.parentNode) playBtn.remove();
-            }, 10000);
-        };
-        
-    } catch (error) {
-        console.error('❌ Ошибка обработки MP3:', error);
-        showToast('❌ Ошибка', 'Не удалось обработать MP3 файл');
-    }
-}
-
-// Воспроизведение MP3 по URL из Firebase Storage
-function playMP3FromURL(url, filename) {
-    try {
-        const audio = new Audio(url);
-        audio.volume = 1.0;
-        
-        showToast('🎵 Воспроизведение MP3', `Файл: ${filename || 'audio.mp3'}`);
-        
-        audio.play().then(() => {
-            console.log('✅ MP3 воспроизводится:', filename);
-        }).catch((error) => {
-            console.error('❌ Ошибка:', error);
-            showToast('❌ Ошибка', 'Не удалось воспроизвести MP3');
-        });
-        
-        audio.onended = function() {
-            console.log('✅ MP3 завершён');
-        };
-        
-        audio.onerror = function() {
-            showToast('⚠️ Внимание', 'Нажмите на страницу для воспроизведения');
-        };
-        
-    } catch (error) {
-        console.error('❌ Ошибка:', error);
-        showToast('❌ Ошибка', 'Не удалось воспроизвести MP3');
-    }
-}
-
-// Слушатель MP3 сообщений
-function listenMP3Messages() {
-    const voiceRef = database.ref('voiceMessages');
-    
-    voiceRef.on('child_added', (snapshot) => {
-        const data = snapshot.val();
-        
-        if (data.type === 'mp3') {
-            if (data.mp3_url) {
-                // Новый способ — через URL (Firebase Storage)
-                console.log('🎵 Получен MP3 (URL):', data.filename);
-                playMP3FromURL(data.mp3_url, data.filename);
-            } else if (data.mp3_data) {
-                // Старый способ — через base64 (для маленьких файлов)
-                console.log('🎵 Получен MP3 (base64):', data.filename);
-                playMP3FromBase64(data.mp3_data, data.filename);
-            }
-            
-            setTimeout(() => {
-                snapshot.ref.remove();
-                console.log('🗑️ MP3 удалён из Firebase');
-            }, 5000);
-        }
-    });
-}
-
-// Инициализация MP3 слушателя
-function initMP3Receiver() {
-    console.log('🎵 MP3 Receiver инициализирован');
-    listenMP3Messages();
-}
-
     // ============================================================
     // СТАРТ
     // ============================================================
@@ -2704,7 +2582,7 @@ function initMP3Receiver() {
     console.log('🔔 Push-уведомления со звуком включены');
     console.log('🎙️ Озвучка доступна только для Данилы');
     console.log('🏠 Раздел "Доставка на дом" полностью обновлён!');
-    console.log('🎵 MP3 Receiver запущен! Ожидание MP3 файлов из Python');
+    console.log('📋 Вкладки с заказами, детали с картой и статусы: В пути, Приехал, Отменен');
     </script>
 
 </body>
