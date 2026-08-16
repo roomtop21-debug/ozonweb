@@ -2570,86 +2570,67 @@
         }
     }, 300000);
 
-    // ================================================================
-    // ⭐ АВТОВОСПРОИЗВЕДЕНИЕ MP3 ИЗ FIREBASE
-    // ================================================================
+// ================================================================
+// ⭐ АВТОВОСПРОИЗВЕДЕНИЕ MP3 ИЗ FIREBASE
+// ================================================================
 
-    function playMP3FromBase64(mp3_data, filename) {
-        try {
-            // Декодируем base64 в бинарные данные
-            const binaryString = atob(mp3_data);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            const blob = new Blob([bytes], { type: 'audio/mpeg' });
-            const url = URL.createObjectURL(blob);
-            
-            // Создаём аудио элемент и воспроизводим
-            const audio = new Audio(url);
-            audio.volume = 1.0; // Максимальная громкость
-            
-            // Показываем уведомление
-            showToast('🎵 Воспроизведение MP3', `Файл: ${filename || 'audio.mp3'}`);
-            
-            audio.play().then(() => {
-                console.log('✅ MP3 воспроизводится:', filename);
-            }).catch((error) => {
-                console.error('❌ Ошибка воспроизведения:', error);
-                showToast('❌ Ошибка', 'Не удалось воспроизвести MP3');
-            });
-            
-            // Освобождаем память после окончания
-            audio.onended = function() {
-                URL.revokeObjectURL(url);
-                console.log('✅ MP3 завершён');
-            };
-            
-            // Если аудио не воспроизводится (автоблокировка) — показываем кнопку
-            audio.onerror = function() {
-                showToast('⚠️ Внимание', 'Нажмите на страницу для воспроизведения MP3');
-                // Создаём кнопку для ручного воспроизведения
-                const playBtn = document.createElement('button');
-                playBtn.textContent = '▶️ Нажмите для воспроизведения MP3';
-                playBtn.style.cssText = `
-                    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-                    padding: 15px 40px; background: linear-gradient(135deg, #005bff, #7f3bff);
-                    color: white; border: none; border-radius: 14px; font-size: 18px;
-                    font-weight: 700; cursor: pointer; z-index: 9999;
-                    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-                    animation: pulse 1.5s infinite;
-                `;
-                playBtn.onclick = function() {
-                    audio.play();
-                    this.remove();
-                };
-                document.body.appendChild(playBtn);
-                
-                // Удаляем кнопку через 10 секунд
-                setTimeout(() => {
-                    if (playBtn.parentNode) playBtn.remove();
-                }, 10000);
-            };
-            
-        } catch (error) {
-            console.error('❌ Ошибка обработки MP3:', error);
-            showToast('❌ Ошибка', 'Не удалось обработать MP3 файл');
+function playMP3FromBase64(mp3_data, filename) {
+    try {
+        const binaryString = atob(mp3_data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
         }
-    }
-
-    // Слушаем новые сообщения с MP3
-    function listenMP3Messages() {
-        const voiceRef = database.ref('voiceMessages');
+        const blob = new Blob([bytes], { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
         
-        voiceRef.on('child_added', (snapshot) => {
-            const data = snapshot.val();
+        const audio = new Audio(url);
+        audio.volume = 1.0;
+        
+        showToast('🎵 Воспроизведение MP3', `Файл: ${filename || 'audio.mp3'}`);
+        
+        audio.play().then(() => {
+            console.log('✅ MP3 воспроизводится:', filename);
+        }).catch((error) => {
+            console.error('❌ Ошибка воспроизведения:', error);
+            showToast('❌ Ошибка', 'Не удалось воспроизвести MP3');
+        });
+        
+        audio.onended = function() {
+            URL.revokeObjectURL(url);
+            console.log('✅ MP3 завершён');
+        };
+        
+        audio.onerror = function() {
+            showToast('⚠️ Внимание', 'Нажмите на страницу для воспроизведения MP3');
+            const playBtn = document.createElement('button');
+            playBtn.textContent = '▶️ Нажмите для воспроизведения MP3';
+            playBtn.style.cssText = `
+                position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+                padding: 15px 40px; background: linear-gradient(135deg, #005bff, #7f3bff);
+                color: white; border: none; border-radius: 14px; font-size: 18px;
+                font-weight: 700; cursor: pointer; z-index: 9999;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+                animation: pulse 1.5s infinite;
+            `;
+            playBtn.onclick = function() {
+                audio.play();
+                this.remove();
+            };
+            document.body.appendChild(playBtn);
             
-            // Проверяем, что это MP3
-            if (data.type === 'mp3' && data.mp3_data) {
-                console.log('🎵 Получен MP3:', data.filename || 'audio.mp3');
-                console.log('📤 Отправитель:', data.author || 'Неизвестно');
-                
-               // Воспроизведение MP3 по URL из Firebase Storage
+            setTimeout(() => {
+                if (playBtn.parentNode) playBtn.remove();
+            }, 10000);
+        };
+        
+    } catch (error) {
+        console.error('❌ Ошибка обработки MP3:', error);
+        showToast('❌ Ошибка', 'Не удалось обработать MP3 файл');
+    }
+}
+
+// Воспроизведение MP3 по URL из Firebase Storage
 function playMP3FromURL(url, filename) {
     try {
         const audio = new Audio(url);
@@ -2678,7 +2659,7 @@ function playMP3FromURL(url, filename) {
     }
 }
 
-// Обновлённый слушатель
+// Слушатель MP3 сообщений
 function listenMP3Messages() {
     const voiceRef = database.ref('voiceMessages');
     
@@ -2687,7 +2668,7 @@ function listenMP3Messages() {
         
         if (data.type === 'mp3') {
             if (data.mp3_url) {
-                // Новый способ — через URL
+                // Новый способ — через URL (Firebase Storage)
                 console.log('🎵 Получен MP3 (URL):', data.filename);
                 playMP3FromURL(data.mp3_url, data.filename);
             } else if (data.mp3_data) {
@@ -2703,11 +2684,12 @@ function listenMP3Messages() {
         }
     });
 }
-    // Инициализация MP3 слушателя
-    function initMP3Receiver() {
-        console.log('🎵 MP3 Receiver инициализирован');
-        listenMP3Messages();
-    }
+
+// Инициализация MP3 слушателя
+function initMP3Receiver() {
+    console.log('🎵 MP3 Receiver инициализирован');
+    listenMP3Messages();
+}
 
     // ============================================================
     // СТАРТ
